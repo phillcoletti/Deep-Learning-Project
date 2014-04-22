@@ -1,0 +1,1302 @@
+\documentclass[12pt,letterpaper,titlepage]{article}
+\usepackage{rotfloat}
+\usepackage{adjustbox}
+\usepackage[margin=1in]{geometry}
+\usepackage{multirow}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{wrapfig}
+\usepackage[font={small,it}]{caption}
+\usepackage[pdfborder={0 0 0 [0 0]}]{hyperref}
+\usepackage{tocloft}
+\linespread{1.1}
+\usepackage{etoolbox}
+\usepackage[usenames,dvipsnames]{color}
+\usepackage{listings}
+\usepackage{pdfpages}
+\usepackage{titlesec}
+\usepackage{indentfirst}
+
+\lstset{
+  backgroundcolor=\color{White},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+  basicstyle=\footnotesize,        % the size of the fonts that are used for the code
+  breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+  breaklines=true,                 % sets automatic line breaking
+  captionpos=b,                    % sets the caption-position to bottom
+  commentstyle=\color{Green},    % comment style
+  deletekeywords={...},            % if you want to delete keywords from the given language
+  escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+  extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+  frame=single,                    % adds a frame around the code
+  keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+  keywordstyle=\color{Blue},       % keyword style
+  language=Ruby,                 % the language of the code
+  morekeywords={*,...},            % if you want to add more keywords to the set
+  numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+  numbersep=5pt,                   % how far the line-numbers are from the code
+  numberstyle=\tiny\color{Gray}, % the style that is used for the line-numbers
+  rulecolor=\color{Black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+  showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+  stringstyle=\color{Purple},     % string literal style
+  tabsize=2,                       % sets default tabsize to 2 spaces
+  title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+}
+
+%set spacing around section titles
+\titlespacing*{\section}
+{0pt}{10pt}{5pt}
+\titlespacing*{\subsection}
+{0pt}{10pt}{5pt}
+
+%line numbers in code listings begin at correct line
+\makeatletter
+\patchcmd{\lst@GLI@}% <command>
+  {\def\lst@firstline{#1\relax}}% <search>
+  {\def\lst@firstline{#1\relax}\def\lst@firstnumber{#1\relax}}% <replace>
+  {\typeout{listings firstnumber=firstline}}% <success>
+  {\typeout{listings firstnumber not set}}% <failure>
+\makeatother
+
+%redefine item to be more compact
+\newlength{\wideitemsep}
+\setlength{\wideitemsep}{.5\itemsep}
+\addtolength{\wideitemsep}{-7pt}
+\let\olditem\item
+\renewcommand{\item}{\setlength{\itemsep}{\wideitemsep}\olditem}
+
+\newcommand\attn[1]{{\color{red} #1}}
+\newcommand\itemc{
+\vspace{-6pt}
+\item
+}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\includegraphics[width=\textwidth]{cedclogo}\\
+\vspace{.5in}
+\textbf{\Large Final Design Review}\\
+\vspace{.3in}
+\emph{Submitted in partial fulfillment of the requirements for}\\
+\vspace{.1in}
+\textsc{Engs 90: Engineering Design Methodology and Project Completion}\\
+\vspace{.5in}
+\textbf{\LARGE Remote Application for Hypertherm CNCs}\\
+\vspace{.1in}
+\today \\
+\vspace{.5in}
+\emph{Sponsored by}\\
+\vspace{.1in}
+\textbf{\Large Hypertherm Inc.}\\
+\vspace{.5in}
+\textbf{\Large Project Team \#19}\\
+\vspace{.1in}
+\textbf{Phillip Coletti \\ Matthew Diephuis \\ Vipul Kakkad \\ Michael Urbach \\}
+\vspace{1in}
+\includegraphics[width=300px]{thayerlogo}
+\end{center}
+\end{titlepage}
+
+\thispagestyle{empty}
+\tableofcontents
+\thispagestyle{empty}
+
+\clearpage	
+\newpage
+\begin{center}\textbf{\Large Executive Summary}\end{center}
+\cftaddtitleline{toc}{section}{Executive Summary}{}
+
+Metal-cutting is an integral part of the large scale manufacturing industry. CNC (Computer Numerical Control) machines are critical tools for this industry as they provide the most efficient and accurate method for automating the large scale manufacturing of products. Companies that develop these CNC cutting systems are constantly innovating to further increase operational efficiency. Currently, operation, configuration, and monitoring of CNC tools occurs at the physical location of the cutting machine. As the scale of manufacturing plants continues to grow and technologies such as mobile devices become ubiquitous, there is a growing need and opportunity to move the monitoring of these complex machines to a remote and potentially portable location.
+
+Hypertherm, our project sponsor and the world leader in plasma cutting technology, is a leading force in CNC innovation and is keen to position itself at the forefront of this movement towards remote monitoring. In the long term, Hypertherm hopes to develop a system which can handle the majority of CNC monitoring and is not tethered to one particular machine. Guided by analysis of CNC users' feedback and the goals of our sponsor, we determined that the ideal solution to this industry problem was to develop a software application that can be used across multiple platforms.
+
+Employing an agile development approach, our team developed a standalone application, consistently building and refining functionality over series of weekly sprints. We have successfully completed our final deliverable: a prototype web application with a dashboard providing users with diagnostic information for all CNCs owned by their respective companies. We have also developed native applications that replicate the website functionality and allow our users to receive push notifications on their mobile device with urgent updates about the status of CNCs. We deployed and tested our application with an internal team at Hypertherm and incorporated their feedback into our final solution. Our final product solves many of the user needs identified during the initial user research stage and serves as a proof of concept to Hypertherm that a cross-platform software application can ultimately serve as the primary monitoring system for CNC machines. Inside this final design report you will find a detailed discussion of the process underlying our various design decisions, a description of the finished product, an account of the validation and testing of our application, and suggestions for how Hypertherm can continue to innovate by building on top of the platform our product provides.
+
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+\section{Overview} \label{sec:Overview}
+
+An integral part of the large-scale manufacturing industry, the metal-cutting industry constantly strives to improve efficiency through innovation. Computer Numerical Control (CNC) machines allow for efficient high-accuracy metal cutting and stand at the center of technological improvements in metal cutting. Our sponsor, Hypertherm Inc., is a leading manufacturer of CNCs, power supplies, and plasma cutting tools (Appendix \ref{tab:HyperthermInIndustry}). Hypertherm is committed to bringing cutting-edge CNC technology to their customers, and they have identified remote CNC interfacing capabilities as a major opportunity to boost user and machine efficiency.
+
+We began our project by delving into this identified opportunity, confirming that there is a clear user need for remote capabilities. With the help of the Software and Automation
+team at Hypertherm (SA team) and two visits to commercial metal-cutting facilities
+(Appendix \ref{InterviewNotes}), we discovered that there are four primary classes of Hypertherm
+product users: operators, managers, technicians, and original equipment manufacturers (OEMs), each with their own use cases (Appendix \ref{list:UserGroups}). With this understanding of the classes of users and their respective needs, we were able to define the central problem as follows:
+
+“In the precision metal cutting industry, CNCs are currently fixed in one location, directly
+next to the cutting table. CNC users have no easy way to conduct data transactions
+with the CNC without being physically present in front of the cutting table. This proximity
+requirement leads to unnecessary loss of users time and machine operating efficiency."
+
+We formulated user stories to illustrate what specific remote capabilities would be helpful
+for each kind of user (Appendix \ref{list:UserStories}) and then narrowed down this list by potential impact,
+as indicated by user testimony from our commercial site visits (Appendix \ref{InterviewNotes}), to three key
+needs which comprised the initial focus of our project.
+
+\begin{enumerate}
+\item As an operator, I would like to be notified when an error occurs on a machine, so that I can minimize machine down time when I am not next to the machine and spend less time monitoring the machine directly.
+\item As a manager, I would like to monitor the real-time progress of all ongoing jobs, so that I can quickly respond to customer inquiries without having to waste time going down to the plant floor.
+\item As a manager, I would like to be able to collect CNC usage data over time, so that I can analyze it to gain insight into and optimize the plant workflow.
+\end{enumerate}
+
+These cases focus on the potential efficiency benefits of remote monitoring, and the driving requirements of the project follow directly from the above need statement. The solution must:
+\begin{enumerate}
+\item Increase efficiency of the users of the CNC by allowing users to spend less time by the physical CNC
+\item Increase efficiency of the machines controlled by the CNC by reducing machine down-time 
+\end{enumerate}
+
+The client has also defined hard constraints to ensure the safety of the CNC operator and maintain the full functionality of the CNC. The solution will:
+\begin{enumerate}
+\item NOT move the cutting tool
+\item NOT start or stop a cutting tool
+\item NOT decrease the accuracy of the CNC or cutting tool
+\end{enumerate}
+
+Our research (Appendix \ref{ResearchandStateoftheArt}) into the state of the art solutions confirmed that no existing product meets the requirements and constraints that we have outlined above. Analogous systems constructed by competitive companies either exactly reproduce the physical CNC interface on a tablet \cite{fanuc} or allow users to cut parts on the machine remotely \cite{burny}, introducing safety risks to operators. Neither of these designs provide a way to monitor multiple CNCs in a unified dashboard interface. Small-scale software firms have built products similar to what we envisioned, but specifically for other machines that are not portable to Hypertherm CNCs \cite{sdart},\cite{mckenna}. General purpose data acquisition systems require dedicated hardware installations \cite{predatormdc} that are unnecessarily complex and expensive, given that that Hypertherm CNCs are fully functional computers equipped with all the necessary hardware to transmit information. Our adviser, Professor Taylor, owns a patent for a dedicated hardware system \cite{patent}, and we worked with him to ensure that we did not infringe on his intellectual property.
+
+The multitude of attempted solutions confirms the industry need for remote interfacing, but none of these existing products are compatible with Hypertherm CNCs, nor do they adequately address user needs while preserving operator safety. Keeping in mind the requirements and specifications(Appendix \ref{tab:RequirementsandSpecifications}) and our analysis of their relative importance (Appendix \ref{tab:PairwiseComparisonofRequirements}), we considered different types of solutions, deciding to go with a software solution (Appendix \ref{tab:HighLevelConceptDecisionMatrix}). Within the software solutions, we compared different options (Appendix \ref{tab:SoftwareConceptDecisionMatrix}), and decided to develop a stand-alone cross-platform smartphone app for our sponsor.
+
+Though the project deliverable was initially envisioned as a fully-developed and deployable solution, it became clear during development that the scope needed to be redefined, due to the following:
+\begin{enumerate}
+\item Hypertherm is currently in the alpha stage of the long development cycle of Phoenix, their main CNC software. As a result, our system is not compatible with the currently deployed stable release and will only be compatible with the next release of Phoenix.
+\item In keeping with good engineering practices, Hypertherm intends to put our system through substantial internal vetting and further development before deploying it at actual user sites.
+\item The short time frame of ENGS 89/90 does not allow us to complete the development cycle and carry this system past the alpha-testing stage.
+\end{enumerate}
+
+With these factors in mind, the deliverable for the project was redefined as a \textit{functional prototype} of the final product. This prototype will demonstrate proof-of-concept of the remote interfacing capabilities of Hypertherm CNCs and efficiency improvements that such a remote monitoring interface creates. Our solution will:
+\begin{enumerate}
+\item Provide a robust and scalable infrastructure for a monitoring system upon which additional functionality can be easily built.
+\item Allow the user to monitor the real-time progress of at least 10 concurrent jobs with updates every second.
+\item Actively push notifications from the CNC to the user within 1 minute of error/stoppage
+\item Allow a user to store CNC usage data for at least 7 days after the usage occurs.
+\end{enumerate}
+
+Additionally, given the refinement in scope of the project, and our group's narrow focus on providing value to the end user, the Software and Automation team agreed that the system security falls outside the scope of the project. Such an endeavor would need to be completely re-engineered in a deployment scenario and is intimately tied to the details of the software system running on the CNC itself, to which our group has no access. Our group would, instead, build the web-application prototype following best practices in areas such as authentication and data storage.
+
+\section{Description of Delivered Solution} \label{sec:DescriptionofDeliveredSolution}
+
+Over the course of ENGS 89/90, our group worked together with the SA team at Hypertherm in week-long sprint cycles and has succeeded in delivering a functional prototype that meets the functional requirements described in section \ref{sec:Overview}. The prototype has been fully tested, gathering data both from a CNC simulator running on a laptop computer and from fully-functional CNCs at Hypertherm facilities.
+
+The final prototype consists of two major components, the application server which receives data from all CNCs and displays the data to users, and the software running on the actual CNCs themselves, which transmits the data to the central server. The Hypertherm SA team was responsible for the implementation of the CNC-hosted software component in accordance with the jointly developed Application Programming Interface specifications (Appendices \ref{sec:JSONAPIWikiPage} and \ref{sec:AppendixScrumDo}). Our team developed the central application server component, which is described below:
+
+\subsection{User and Company Account} \label{sec:UserandCompanyAccounts}
+
+Each user of this system has their own account with a username and password. Each user account is associated with a company account, owned by the company's admin. Creation and management of company accounts will be performed by a central webmaster at Hypertherm. These company accounts ensure that users in one company can not view CNCs or data belonging to another company.
+
+In order to create an account, a new user is required to enter an email address (which serves as their username), set a password, select their company, and enter their company password. Standard account features, such as the ability to change and reset your password, have been included. Once signed up, a user has access to all CNCs owned by his or her company and can monitor them using the views discussed below.
+
+\subsection{High-level Multiple-CNC Dashboard} \label{sec:HighlevelMultipleCNCDashboard}
+
+All CNCs owned by the company are available in the ``Add CNCs'' page (Appendix \ref{app:AddCncs}), and a user can choose which ones to monitor by adding them to their dashboard. The dashboard (Fig. \ref{fig:DashboardView}) displays a tile for each CNC, titled with the name of the CNC or the machine's unique serial number if the name has not been set. The central button shows the current status of the CNC, with each status denoted by a unique background color. The name of the current or most recent job is displayed, along with a progress bar showing an approximate job completion percentage. \footnote{The progress bar is not currently functional due to an unmet dependency at Hypertherm's end, but is fully implemented on our end, and will be functional as soon as the data is available from the CNC.}
+
+\begin{figure}[h]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=.95\linewidth]{screenshot_statustab2}
+  \caption{Status View}
+  \label{fig:StatusView}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[scale=.3]{screenshot_dashboard2}
+  \vspace{-30pt}
+  \caption{Dashboard View}
+  \label{fig:DashboardView}
+\end{minipage}
+\end{figure}
+
+\subsection{Detailed View of CNCs} \label{sec:DetailedViewofCNCs}
+
+By clicking on the status button in the dashboard, a user can access the detailed views for a single CNC, which are organized into the ‘Status’, ‘Job’ and ‘Analytics’ tabs.
+The Status tab (Fig. \ref{fig:StatusView}) displays the current status of the CNC and an information feed, both of which update in real time. The information feed serves as a logbook for the CNC and the central forum for communication and collaboration for the CNC users. Users can post comments to this feed to report error diagnoses or request further assistance, and the CNC itself makes a post each time its status changes.
+The Job tab (Appendix \ref{app:job}) displays real-time information about the CNC's current job and shows the full job queue lined up for the CNC. \footnote{Currently, the CNCs do not provide information about queued jobs, only the current job. The functionality to display the entire queue is in place and tested, and will be functional when the data dependency is met by Hypertherm.}
+The Analytics tab (Fig. \ref{fig:AnalyticsView}) shows a plot of the fraction of time the CNC spent in different states for each day over the past week.
+
+\begin{figure}[t]
+  \begin{centering}
+  	\vspace{-5pt}
+  	\includegraphics[width=.95\linewidth]{screenshot_analyticstab2}
+  	\vspace{-10pt}
+  	\caption{Analytics View}
+    \label{fig:AnalyticsView}
+  	\vspace{-20pt}
+  	\end{centering}
+\end{figure}
+
+\subsection{Notification System} \label{sec:NotificationSystem}
+
+\begin{wrapfigure}{rh}{0.4\textwidth}
+  \begin{centering}
+  	\vspace{-10pt}
+    \includegraphics[width=.95\linewidth]{screenshot_android2}
+    \vspace{-10pt}
+    \caption{Android Push Notifications}
+    \label{fig:Android}
+  \end{centering}
+  \vspace{-10pt}
+\end{wrapfigure}
+
+To support the push-notification functionality, we developed native applications for the Android and iOS phone/tablet operating systems which embed the same interface described above. If a user is logged in through the app on an Android/iOS device and any CNC on their dashboard goes into an error state or reaches the end of a job, the user will receive a push notification on their device with the name of the CNC and the reason for the notification (Fig. \ref{fig:Android}, Appendix \ref{app:ios}).
+Tapping the notification takes the user directly to the Status tab of the detailed view for the CNC generating the notification so that the user can immediately see the information feed with other users' comments on the new event.
+
+\subsection{Data Aggregation Functionality} \label{sec:DataAggregationFunctionality}
+
+Our system currently stores all CNC status change events in a PostgreSQL database, accessible through standard SQL database tools. The database interface for the final solution will depend on the specific deployment of the final solution's database, and, therefore, falls outside the scope of this project. However, we do use the data aggregation functionality heavily in the testing and validation of our prototype.
+
+\section{Evolution of the Design} \label{sec:EvolutionoftheDesign}
+
+\subsection{Structure of the Cross-Platform Application} \label{sec:StructureoftheCrossPlatformApplication}
+
+There is no industry standard way of implementing cross-platform applications, so we compared developing our system as a web app, as a pair of completely native apps, as a hybrid app combining the two, or with a Mobile Application Development Platform (MADP).
+
+We ruled out a pure web app, since push notifications are critical to our system and that means our solution needs to have a native component. Purely native apps would mean implementing multiple code bases to achieve the same user interface on different operating systems. Using a MADP would have allowed us to have one code base for different native app, but would require inclusion of a large amount of third party code. Additionally, we encountered problems integrating push notifications with our web app that we would not have been able to solve with a MADP. We needed access to the native device and the layer of abstraction provided by a MADP would have have prevented such access. Ultimately, we built our system as a hybrid app where most of the functionality is implemented as a web app that can be opened in a browser on any device. We implemented native iOS and Android applications that embed the web app in a browser view and implement push notifications.
+
+\subsection{Programming Language and Framework} \label{sec:ProgrammingLanguageandFramework}
+
+While choice of syntax is immaterial, different language-framework combinations offer different levels of library support, development complexity, and performance. We considered Python with Django, Ruby on Rails, and JavaScript with Node.js (Appendix \ref{tab:LanguageFrameworkAppendix}). In the end, Ruby on Rails emerged as the optimal technology, offering the most extensive set of libraries while still maintaining good performance. Its built-in object relational mapping and associations are particularly powerful tools for an application with simple data relationships such as our application, and rapid prototyping is made easy by the Rails scaffold functionality. Django does not provide as extensive a set of libraries, and Node.js is designed for high-performance apps with tens of thousands of concurrent connections. Such concurrency capabilities are unnecessary for our application.
+
+\subsection{Network Architecture} \label{sec:NetworkArchitecture}
+
+The hybrid web app has two main components: Hypertherm code that runs on the CNC machine, allowing for interfacing with Phoenix software, and a central app server that receives updates and serves data requests from viewing devices. For this server to be reachable by any device connected to the internet, it has to be located at a known static address. In our original design, the app server sent requests to the CNCs at regular intervals and waited for them to respond with their status updates. This architecture complicated the process of discovering new CNCs on the network, and the process of sending data to the CNC machines introduced an additional security vulnerability. Therefore, we redesigned the system to reflect the traditional client-server paradigm, such that the CNCs independently push update packets up to the central server without polling. This new architecture reduced the required throughput of data, simplified the CNC discovery process, and improved the system security.
+
+\subsection{Hosting} \label{sec:Hosting}
+
+Although Hypertherm may want to host its application on a private server for the final deployment, our group decided to use the Heroku cloud-hosting service for our prototype deployment. Using Heroku drastically reduced the operational overhead of deployment and allowed us to quickly get the prototype functional for user testing.
+
+\subsection{Communication Protocol} \label{sec:CommunicationProtocol}
+
+The safety of users is paramount, so the security of the CNC is a concern for a remote CNC interface. Protecting the CNC itself from a direct attack is outside the scope of our project, but the remote monitoring application should not provide any additional avenues through which to infiltrate the CNC.
+We chose not to invest in a cutting-edge, custom communication protocol, since that would be prohibitively complex to implement and still not address the comparatively larger security concerns with the operating system of the CNC.
+For the purposes of the prototype, we chose to use standard HTTP for our communications. This protocol would need to be upgrade to the industry-standard HTTPS, which is HTTP with a Transport Layer Security (TLS) encryption layer, typically with 256 bit AES encryption.
+User safety is ensured by the fact that the API does not include any functionality to start, stop or modify settings on the CNC. As an added precaution, the Phoenix interface is explicitly programmed to discard any incoming messages from our application, ensuring that our system remains a purely monitoring application that does not influence the functionality of the CNC in any way.
+
+\subsection{Database Architecture} \label{sec:DatabaseArchitecture}
+
+At the core of the server is a single relational database storing all of the application data. 
+In addition to user and machine data, we also store analytics data and events in their own special tables in the database. Because our application receives status data from every CNC every second, the system needs to be able to handle all the requests and store the data efficiently. Through performance profiling it became clear that the way we stored and queried the data had to be improved.
+
+In the initial design of the data logging system, we stored every CNC status update as a row in one big table. To calculate the analytics for a given machine and render the analytics table, we would query for all of the data points for that machine and process the results in Ruby to produce averages. This computation scaled incredibly poorly, as one week of data logging would represent over 600,000 data points for one CNC. The database queries took an average of 8.288 seconds, and the total page load time was 8.51 seconds on average.
+
+We began improving the loading speed of the analytics tab by caching the results of the slowest database queries for 12 hours. This resulted in a substantial improvement in load time after the initial cache. The time spent executing database queries dropped to 1.288 seconds on average, and the average page load time dropped 82\% to 1.5 seconds (Appendix \ref{AnalyticsTabProfiling}).
+
+We further optimized this tab's performance by caching not only the database results, but the averages that we compute in Ruby. By caching the processed data, we don't recompute averages every time the tab is requested. The database queries dropped to 0.002 milliseconds on average, and caching the post-processing results dropped the average page load time to 154 milliseconds, a 98\% reduction from the initial figure of 8.51 seconds (Appendix \ref{AnalyticsTabProfiling}). 
+
+During user testing, our group received complaints of laggy performance of the application (Appendix \ref{tab:UserInterfaceFeedbackSurvey}). A thorough investigation revealed that we were causing a backup in the application server by storing every single redundant status update. This led us to only store the events when a machine's status changed, along with the length of time spent in the previous state. By only storing events, we were able to eliminate the bottleneck and dramatically reduce the amount of memory we used. For example, over the course of one week the two CNCs in the Cut Lab generated 1,188,800 data points but only 249 events, allowing us to store the same information using only 0.02\% of the database space (Appendix \ref{AnalyticsTabProfiling}).
+
+\subsection{Graphics and Data Visualization} \label{sec:GraphicsandDataVisualization}
+
+End user interviews at NSA Technologies, Structal, and the Hypertherm Cut Lab revealed that there was a need to visualize data about changes in user and machine efficiency over time. In order to produce the visualization on the CNC Analytics tab, our group chose to use D3.js, a standard software library for web-based data visualization, due to its wide range of capabilities and good documentation. In order to provide further abstraction and allow for more rapid prototyping, we leveraged a second library, NVD3, that provides built-in methods for creating common visualizations using D3.js.
+
+\subsection{Push Notifications} \label{sec:PushNotifications}
+
+To implement push notifications for both iOS and Android, we followed the protocols outlined for Apple Push Notification \cite{apn} and Google Cloud Messaging \cite{gcm} services. Both of these services provide a server which our application contacts in order to send notifications to users who are running one of our native applications on their phone.
+
+Our application requires a way to pass device identifiers from a user's device to our server. In order to associate a user's physical device with their account on our web application, we created interfaces between the javascript in our website and the native application, allowing the server to directly access the registration data on the device. This is quicker and more reliable than having the device post to our web server through HTTP.
+
+\section{Validation and Testing of Delivered Solution} \label{sec:ValidationandTestingofDeliveredSolution}
+
+In order to validate that our delivered prototype meets the functional and driving requirements laid out above, we sought to prove that our software is stable, that the user interface is well designed, and that use of our prototype results in efficiency improvements in the workflow CNC users.
+
+\subsection{Unit Testing} \label{sec:UnitTesting}
+
+In order to ensure a robust software product, it was critical for our group to develop a unit-test suite. Leveraging the popular Ruby on Rails test library, RSpec, we developed an extensive test harness for our application logic. The purpose of this test-suite is to verify the functionality of the application before deployment. After making code changes, a developer can run the entire test-suite to confirm that no updates have created new bugs or broken previously functional components of the application. The test suite covers 96\% of our application logic, hitting each line in the code base an average of 3.85 times (Appendix \ref{sec:AppendixTestCoverage}).
+
+\subsection{User Testing} \label{sec:UserTesting}
+
+Unfortunately, testing our product with Hypertherm end users proved to be infeasible given the long development cycle of Phoenix CNC software and lack of access to Hypertherm customers. Our group's closest accessible approximation of Hypertherm end users were the employees at the Hypertherm Cut Lab, where CNC operators run tests on real CNC cutting tables to empirically measure cut quality and consumable life of Hypertherm products. The equipment used at the Cut Lab is identical to that used at Hypertherm end user sites across the world. Moreover, the Cut Lab operators have similar workflows, encounter similar errors, and would be able to provide insight as to the usefulness of our product.
+
+After installing the proper CNC software at the Cut Lab, we gathered control data of machine status and error response for a week to establish a baseline efficiency for the CNC operators. We then gave the Cut Lab employees access to the application, installed the smartphone app prototypes, and had them use the application to quantify efficiency changes driven by our application. We collected qualitative user interface feedback using an augmented version of the Software Usability Scale (Appendix \ref{tab:UserInterfaceFeedbackSurvey}). It was clear from the ratings that our system was well received.
+
+We gauged user sentiment  from the survey results and in-person interviews at the Cut Lab. Five of our six testers found the CNC identifiers and status indicators in the dashboard useful. Suggestions included making the list of CNCs sortable and searchable, both in the dashboard and ``Add CNC'' page. Users also liked the idea of the progress bar even though it is not yet functional. Responses also indicated that users would like to have more information in the detailed view tab such as gas guage and arc temperature. Lastly, users would like to see error descriptions in the status feed and notifications.
+
+In terms of analytics, all of our respondents said that a pie chart or a time series plot of time spent in the different states would be useful. They thought that this graphical representation would be a useful tool not just for operators, but also for managers who run the lab and make decisions about workflow and job scheduling.
+
+In both surveys and interviews, users said that the notification system was extremely useful and that they would like to have the option of only receiving notifications from specific jobs.
+
+\subsection{Quantitative Testing} \label{sec:QuantitativeTesting}
+
+Unfortunately, the Cut Lab tests did not allow us to effectively quantify the efficiency changes driven by our application. Upon inspection, the control data indicated that about 99\% of machine operation time was spent in the idle state. At that stage in the testing cycle of the Cut Lab, the majority of time was spent taking precise measurements of cut parts while the actual cutting time was minimal. Furthermore, the Cut Lab operators were reluctant to test our system since any performance changes introduced by the software could influence long-term studies that were already underway.
+
+\begin{wrapfigure}{r}{0.65\textwidth}
+  \begin{centering}
+    \vspace{-20pt}
+    \includegraphics[scale=.5]{StudyResults2}
+    \vspace{-25pt}
+    \caption{Study Subjects' Status Change Response Time}
+    \label{fig:StudyResults}
+  \end{centering}
+  \vspace{-20pt}
+\end{wrapfigure}
+
+In an effort to quantify the improvements that our system would be able to bring to real users, we decided to run a study that simulates the workflow of operators at end user sites. Our subjects ran ‘jobs’ on virtual CNCs in a browser window (Appendix \ref{sec:SimulationStudy}) so that the testing would not interfere with the work being carried out on real CNCs. Our virtual CNCs had jobs of variable length and would randomly enter an error state that needed to be cleared before the current job could continue. The control group in the study only had access to the simulator while the test group was given the ability, through use of our application, to monitor these virtual CNCs and receive notifications when a job was complete or when an error occurred. Additionally, the subjects would go about their normal job for the duration of the study, a close approximation of the way that CNC operators leave a machine while a job is running. We created a full specification of the study design and parameters used (Appendix \ref{sec:SimulationStudy}).
+
+We used the data aggregation capabilities of our system to collect data on the status changes of each virtual CNC during the study and quantified our application's impact using the following metrics:
+
+\begin{itemize}
+\item Response time to an error status (before it is cleared and the job continues)
+\item Response time to a job being completed (before another job is started on that machine)
+\item Efficiency of the machine (fraction of time spent in Idle / Running / Error statuses).
+\end{itemize}
+
+Despite being an approximation of the real workflow of end users of Hypertherm CNCs, the simulator study our group conducted was the best possible empirical validation of the efficiency improvements of our system given the external constraints of time and lack of access to users. The quantitative results of this testing reinforce our original assumption: a remote interface system that allows users to monitor and receive real-time notifications regarding the status of CNCs can significantly boost the efficiency of CNC machines and their operators. Our application reduced average response time to errors and job completion by 65\% and 35\% respectively (Fig. \ref{fig:StudyResults}) and cut down the non-productive time of CNCs by 40\% overall (Fig. \ref{fig:StatePieCharts}).
+
+\begin{figure}[h]
+	\begin{centering}
+		\vspace{-10pt}
+		\includegraphics[scale=.4]{State2PieCharts}
+		\vspace{-10pt}
+		\caption{Percentage of time CNC machines spent in each state}
+		\label{fig:StatePieCharts}
+		\vspace{-15pt}
+	\end{centering}
+\end{figure}
+
+\section{Economic Analysis} \label{sec:EconomicAnalysis}
+
+In order to develop, deploy, and test our application, we purchased server and database space on Heroku (\$50),  an iOS developer license (\$99), an RSpec reference book (\$40), and a private GitHub account (\$125) \cite{iospricing,github pricing}. These costs have kept us well within our \$1000 budget (Appendix \ref{sec:Expenses}).
+
+More critical to the economic viability of the remote monitoring application is its cost as a final product. Our product should come at no additional cost to end users. Hypertherm should expect to incur costs in continuing to develop and deploy our solution from software maintenance (i.e. developer hours), software licenses, and web server hosting. According to our sponsors, Hypetherm plans to cap their engineering labor investment at \$10,000 for the first year, and \$5,000/year for each year after (Appendix \ref{tab:RequirementsandSpecifications}). Hypertherm already offers remote help services for their CNC software so offering a similar service for our application should add only the incremental cost of educating the technicians on how to service our application. 
+
+The last cost will be from necessary scaling of web servers and databases to support full scale deployment of this product. While there is further discussion of steps to full deployment and different deployment options in Section \ref{sec:RecommendationsforFutureWork}, we will assume that the chosen deployment is on Heroku, one of the best known and simplest Ruby on Rails hosting platforms. For the deployment of our project, we would likely want to increase the number of running instances of our server and the size of our database \cite{scaling}. Calculating the amount of Heroku resources necessary for a full-scale web deployment is beyond the scope of this project. However, based on our experience deploying the prototype to Heroku, we can conservatively estimate that our app will perform at scale with 10 standard instances on Heroku and the middle tier database package, which cost roughly \$4,380 and \$6,780 per year, according to Heroku's pricing plans \cite{heroku pricing}. 
+
+Despite these costs, this product creates an opportunity for Hypertherm to substantially increase profits through cost savings and expanded market share. Our solution will help Hypertherm drastically reduce or eliminate the Hypertherm Tech Service Team's need to travel to end user sites for troubleshooting, an improvement that our sponsors estimate to save \$10,000 annually \cite{econemail}. Because it will be offered free of charge, our product will not boost revenue through direct sales. However, our application helps Hypertherm reach their long-term goal of having a system that easily incorporates and manages both CNCs and power supplies, ultimately enabling them to attract more customers and improve upon their current 25\% market share in the 2-D plasma metal cutting market \cite{econemail}. While unit sales figures are proprietary to Hypertherm and can not be shared, a preliminary investigation from our sponsor on potential additional earnings suggests that providing remote access and monitoring through our solution could boost CNC sales by up to 5\% in the long term, with an immediate sales increase of closer to 1\% within a year. Given Hypertherm's current market share in the plasma division of the multi-billion dollar CNC industry, these incremental sales could be worth millions of dollars. Because Hypertherm's CNCs and plasma systems often come bundled together, expanding marketshare in the CNC industry will allow Hypertherm to sell more consumables for their plasma cutting tools. These indirect revenue streams are extremely lucrative and generate consistent cash flow over the entire lifetime of the CNC \cite{econemail}.
+ 
+Finally, our solution will provide real dollar value to Hypertherm CNC end users. As has been stated, the remote monitoring application will either be offered free of charge. During our user study visit to NSA Technologies (Appendix \ref{InterviewNotes}), we learned that for each machine they experience roughly 3 short stops per day which are non-critical stops that simply require an employee to adjust the machine to get it up and running again. Each short stop creates around 20 to 30 minutes of machine down time. Extrapolating that total downtime out to a year gives 365 hours of downtime per machine. Our goal is to help reduce machine downtime by 25\%, which in this case would be saving about 90 hours of downtime per year. NSA bills their customers roughly \$150 per hour of machine cutting, and using a conservative salary estimate of \$50 per hour for the machine operators, this suggests a total yearly savings per machine of roughly \$75,000 \cite{interview2}.
+As Hypertherm proceeds with the deployment of our solution, we are satisfied that costs are far outweighed by the potential economic gains that our solution stands to generate for both Hypertherm and their end users. 
+
+\section{Recommendations for Future Work} \label{sec:RecommendationsforFutureWork}
+
+\subsection{Visualization} \label{sec:Visualization}
+
+Based on feedback from the Hypertherm Cut Lab, we believe the Analytics tab visualization should be further refined. Currently, this visualizes the percent of time a CNC spent in each state (Running, Idle, Error, etc.) for every day of the past week. The team at the Cut Lab requested the ability to see this information aggregated on a per job basis, in addition to across all jobs (Appendix \ref{tab:UserInterfaceFeedbackSurvey}). With this change our visualization can answer questions like ``How many errors do I get for Job X as opposed to Job Y?'' Additionally, the chart could provide the ability to select a date range, rather than defaulting to the past week. Finally, the chart should be built to aggregate data across one or more CNCs, providing a view of total shop efficiency in addition to per machine efficiency.
+
+\subsection{Localization} \label{sec:Localization}
+
+Given Hypertherm's international scale, it will be important for them to implement a full set of localization features to ensure that the application functions correctly in all parts of the world. The language of all text and the timezone in which events are displayed should be adjusted according to the user's location.
+
+\subsection{Feature Extensions} \label{sec:FeatureExtensions}
+
+Our application provides a flexible platform upon which to add new features. The interface is constructed to be easily extended by appending features to the detailed view navigation bar without having to add any new navigation components.
+
+\subsection{Deployment} \label{sec:Deployment}
+
+A production deployment of our application would require substantially more resources than our prototype deployment. We will examine several deployments that meet the two requisite high level dependencies: a Ruby environment in which to execute application code and a SQL database. First, Hypertherm could provision cloud servers on a service like Heroku or EngineYard that is built to deploy Ruby on Rails applications. This method, which we employed for prototyping, is the simplest but most directly expensive. A second option would be for Hypertherm to use a cloud provider that offers generic compute resources, such as Amazon AWS, and set up the Ruby environment and database on their own. This option provides more flexibility, as the environment and database can be customized for the application, but it requires a substantial amount of effort and is prone to misconfiguration. Finally, Hypertherm could set up the proper environment and database on their own internal server. This is the most complicated method. In addition to correctly configuring the Ruby environment and database, Hypertherm must provision and maintain the server itself in house, something that Heroku or Amazon can do effortlessly behind the scenes. When accounting for the developer hours and technical overhead of configuring the application server, the Ruby on Rails optimized hosting services emerge as the most cost effective options.
+
+\subsection{Scalability} \label{sec:Scalability}
+
+Scalability will be a major concern in a final deployment scenario. To optimize the application for increased traffic, the application should be distributed more broadly and efficiently. Currently, one server handles incoming requests from both the CNC clients sending data to the server and user device clients trying to access the web app. These two types of requests should be handled by separate servers sharing the same database, one receiving CNC requests and updating the database, the other retrieving information from the database to render for user device requests.
+
+As more CNCs are connected to the application, the size of the event database storing machine status changes will grow unwieldy and the Analytics tab will take too long to render. An effective way to shrink this database is to archive old data by storing it offline, to be available upon request, and to compress the current data for immediate analysis on the web app. Data from the last month could be available with daily granularity, data from the last year will available with weekly granularity, and data from more than a year ago available with monthly granularity. Assuming ten events are generated per day, this would increase the effective storage capacity of the database by approximately 3000\%.
+
+\subsection{Security} \label{sec:Security}
+
+Security is a large concern for the final product, given the dangerous potential of CNCs. Although the security of the entire system falls outside the scope of the project, there are several improvements that we suggest should be made to the application. 
+
+There is currently no way for the application to verify CNCs as legitimate, or as belonging to a certain company, other than the company name they send in requests. Someone could pretend to be a CNC belonging to a company and rapidly switch status between running and error. This would generate push-notifications for anybody in the company monitoring that particular CNC, and potentially overload our system. An encrypted authentication system for CNCs, similar to the system employed to verify users would help block such attacks.
+
+Similarly, when a user's device opens the app, their device identifier is automatically registered for push notifications. Currently the interface for registering devices makes no checks of authenticity; any device that says it belongs to a user becomes associated with that user. To prevent attacks against this, a confirmation should be included on the device so that a user has to input a password before the device is associated with their account.
+
+One security feature that was deemed outside the scope of this course was switching all communications to the encrypted version of the HTTP protocol, HTTPS. At the application level, this simply requires a small configuration change. Additionally, Hypertherm would have to obtain secure socket layer (SSL) certificates, which are used to verify and encrypt the communications.
+
+\subsection{Project Handoff} \label{sec:ProjectHandoff}
+
+In order to effectively transfer ownership of the project over to the Hypertherm SA team (primarily Richard Adams and Brad Tetu), our group will hold an onboarding session in the coming weeks. The documentation provided for the project is a self-contained explanation of the codebase, including explanations of system architecture, design decisions, a detailed mapping of the directory structure, and complete annotated examples of the execution flow (Appendix \ref{sec:RailsAppDocumentation}).
+
+\section{Conclusion} \label{sec:Conclusion}
+
+Our group is very pleased with what we have accomplished throughout the course of ENGS 89/90. Over the past 5 months, we have witnessed the scope, requirements, and expectations of our project change considerably. By working closely with our sponsors and constantly re-evaluating our project based on research and testing, we have delivered a final solution that satisfies our sponsor's expectations. Our group has successfully developed a product addressing the needs identified through user interviews and thorough research conducted throughout the duration of the project. Our prototype web application demonstrates to Hypertherm that a remote CNC interface adds real value to their customers. We are confident that Hypertherm will be able to build upon the foundation our project provides and fulfill their long-term vision of a central remote CNC interface for all of their cutting tools and power supplies.
+
+\newpage
+\begin{thebibliography}{30}
+\addcontentsline{toc}{section}{References}
+
+\bibitem{fanuc} Jozsik, Jill. “FANUC CNC OPTION ALLOWS REMOTE MONITORING ON TABLET”, \emph{FANUC FA America Press}. Web.  Published 12th November 2012, Accessed On the 10th of September. \url{http://www.fanucfa.com/us-en/broker?_ic_uCon=7be704cd-5034-fa31-9788-c8d60862f7ec&uBasVariantCon=33333333-3333-3333-3333-333333333333&view=detail&uMen=1c93e416-c564-01e5-945c-c948b7234fed&srStr=presse?uMen%3D1c93e416-c564-01e5-945c-c948b7234fed%26all%3Dtrue}
+
+\bibitem{burny} Burny\textregistered Multiverse Technology: Burny Product Information. \emph{Burny Kaliburn Inc.}, Web. Published June 2012, Accessed 10 November 2013.
+
+\bibitem{sdart} ”CNC Production Monitoring System”. SDART –\emph{Innovation through the clever use of data}. Web. Accessed 11th October, 2013. \url{http://www.sdart.co.uk/production_monitoring_system}
+
+\bibitem{mckenna}  “Reason to monitor your CNC equipment”. \emph{Machine Monitoring, Machine Shop Reporting, CNC Verification, CNC Efficiency, Remote Access Communication, CNC remote communication} – McKenna Service. Web. Accessed 10th of October 2013.\url{ http://www.mckennaservice.com/DNC/Elan/Elan%20Monitor/elan_mointoring_page.html}
+
+\bibitem{predatormdc} “Predator MDC Software , Manufacturing Data Collection, Production Line \& Machine Monitoring”,  \emph{Machine Monitoring Software}. Web. Accessed 9th of October, 2013. \url{http://www.predator-software.com/predator_mdc_software.htm}
+
+\bibitem{patent} Taylor, Steven, and Haaland, Peter . “Scalable, concurrent, distributed sensor system and method.” US patent 7333921, or US parent 20070265796 A1. 15 November 2007
+
+\bibitem{apn} Local and Push Notification Programming Guide, iOS Development Library. \url{https://developer.apple.com/library/ios/documentation/NetworkingInternet/Conceptual/RemoteNotificationsPG/Chapters/ApplePushService.html}
+
+\bibitem{gcm} Google Cloud Messaging for Android, Android Development Center. \url{http://developer.android.com/google/gcm/index.html}
+
+\bibitem{gcm source code} Google Cloud Messaging for Android Demo Source Code, Android Development Center.
+\url{https://code.google.com/p/gcm/source/checkout}
+
+\bibitem{econemail} Wilson, Gregg. Email exchange, 12 November 2013.
+
+\bibitem{interview2} Stanley, Edward. Personal interview at NSA Industries L.L.C., St. Johnsbury, NH, 10 September 2013.
+
+\bibitem{android webview} Building Web Apps in WebView, Android Development Center \url{http://developer.android.com/guide/webapps/webview.html}
+
+\bibitem{apple webview delegate} UIWebViewDelegate Protocol Reference, iOS Developer Library \url{https://developer.apple.com/library/ios/documentation/uikit/reference/UIWebViewDelegate\_Protocol/Reference/Reference.html}
+
+\bibitem{adt} Get the Android SDK, Android Development Center \url{http://developer.android.com/sdk/index.html}
+
+\bibitem{android publish} Get Started with Publishing, Android Development Center \url{http://developer.android.com/distribute/googleplay/publish/register.html}
+
+\bibitem{apple import profile} Importing Your Signing Identities and Provisioning Profiles, iOS Developer Library \url{https://developer.apple.com/library/ios/recipes/xcode\_help-accounts\_preferences/articles/import\_signing\_assets.html}
+
+\bibitem{apple member center} Member Center, iOS Developer \url{https://developer.apple.com/membercenter/index.action}
+
+\bibitem{apple distribution guide} App Distribution Guide, iOS Developer Library \url{https://developer.apple.com/library/ios/documentation/IDEs/Conceptual/AppDistributionGuide/Introduction/Introduction.html}
+
+\bibitem{scaling} Scaling Your Dyno Formation, Heroku Dev Center. \url{https://devcenter.heroku.com/articles/scaling}
+
+\bibitem{iospricing} iOS Developer Program, Apple Development Center \url{https://developer.apple.com/programs/ios/}
+
+\bibitem{github pricing} Plans and Pricing, Github \url{https://github.com/pricing}
+
+\bibitem{rails asset guide} The Asset Pipeline, Ruby on Rails Guides \url{http://guides.rubyonrails.org/asset\_pipeline.html}
+
+\bibitem{rails routing guide} Rails Routing from the Outside In, Ruby on Rails Guides \url{http://guides.rubyonrails.org/routing.html}
+
+\bibitem{relish} RSpec Rails 2.14, Relish \url{https://relishapp.com/rspec/rspec-rails/v/2-14/docs}
+
+\bibitem{heroku pricing} Usage and Billing, Heroku. \url{https://devcenter.heroku.com/articles/usage-and-billing}
+
+\end{thebibliography}
+
+\newpage
+\appendix
+\addcontentsline{toc}{section}{Appendices: Auxiliary Materials} \label{sec:AppendixA}
+
+\newpage
+\section{Hypertherm's Niche Metal-Cutting Industry}\label{tab:HyperthermInIndustry}
+
+The metal-cutting process relevant to Hypertherm’s CNCs is conducted on “XY-tables”, which consist of a platform that supports a sheet of metal horizontally while a cutting tool mounted on two mechanized lateral rails is moved above it in order to cut out the desired shape. Hypertherm’s EDGE CNCs are general purpose for the XY-cutting table structure, and can be used very readily with other cutting tools, such as LASER, Oxy-fuel and water jets. The distribution of their customer base is as follows:
+
+\begin{itemize}
+
+\item 80-90\% plasma
+
+\item $<$1\% LASER
+
+\item5-10\% waterjets, and the rest.
+
+\item 30-50\% of the tables that Hypertherm CNCs are used on have Oxyfuel cutting equipment on it. (typically several torches on the same table)
+
+\end{itemize}
+
+They are currently doing roughly \$500 million in business each year, and hope to double in size within the short term.
+
+In the spectrum of how technically advanced CNC machines can be, Hypertherm has competition from both sides--more high-tech, and less high-tech. The high-end competition is from massive companies such as Siemens, Fanuc, Beckhoff and Bosch--these companies make general purpose CNCs that need to have specific software loaded onto them in order to be used for a specific application. For specific tables, large OEM companies, such as Trumpf, will make their own in-house CNCs.
+
+Hypertherm also experiences competition from cheaper CNCs that may not have the full feature set that Hypertherm provides, but undercut the cost by a significant amount. The primary sources of this competition are cheap CNCs from Shanghai University, and knock-off CNC machines, such as the Chinese “Smart-Edge” from 2005, which was basically the same machine at a lower cost. An Ohio based company called Burny Kaliburn is a direct competitor of Hypertherm and operates in the same market segment.
+
+
+\newpage
+\section{Interview Notes} \label{InterviewNotes}
+Progressive Manufacturing, Inc.
+
+\begin{itemize}
+\item The use two laser machines, one of them is really old, and is operated using a small netbook that sits on top of it and connects through a chord and several adaptors.
+\item The newer one has material handling capabilities, and has it’s own CNC integrated into it, and is supported by the Italian company the built it.
+\item Interestingly, only the old one has a red light mounted high on it to alert people when something needs attention / has gone wrong, but the new one doesn’t.
+\item Holes are typically cut first to avoid ‘tip-ups’, which typically don’t do much damage, but can make the machine stop and sit idle.
+\item Machine is able to communicate cut-quality to the operator by sensing how in-focus the lens focusing the LASER is.
+\item Remote monitoring doesn’t exist at the moment except for remote access for support technicians
+\begin{itemize}
+\item similar system to Hypertherm’s Microsoft Lync help
+\end{itemize}
+\item Cutting:
+\begin{itemize}
+\item Once started, a job / ‘nest’ will just run, but getting a new job selected and up and running takes a lot of time
+\item Have to deal with the windows file system to put the files in the right places to be able to run the programs.
+\item They do a dry run to make sure the program is loaded correctly, before they start doing actual material cutting.
+\end{itemize}
+\item LASER paper is applied to steel surfaces before cutting them, and from time to time, the steel will have cutting issues due to the paper sticking up.
+\begin{itemize}
+\item Don’t want to have to go in and dig up the part, and have to go into the enclosure and stop your machining, etc.
+\item At the beginning, the nest can be simulated to show what the estimate 
+\item Machine operators would like to multi-task, and therefore notification / remote monitoring is useful.
+\end{itemize}
+\item No indication of how long the consumables are going to last, and would like to have some predictive diagnostics and/or some preventative maintenance.
+\end{itemize}
+
+Potential Needs:
+
+\begin{itemize}
+\item Saving time
+\item Improving accuracy
+\item Customization
+\item Designing intuitive user interface that helps people save time and make less configuration errors.
+\item Instead of ‘flat’ interface, have a hierarchy - boil the UI down to the essentials.
+\end{itemize}
+
+Minimum Viable Product might do the following:
+\begin{itemize}
+\item Pull data out of the CNC - diagnostic
+\item CNC can push data and notification
+\item Send config data to the CNC
+\item Intuitive UI.
+\end{itemize}
+
+Notes from NSA:
+
+\begin{itemize}
+\item Run a primarily LASER setup as well, manufacture all sorts of things from exercise equipment, medical / fluid pumps, mostly thin gauge steel and 3000 watt fier.
+\item Combind cutting and punching is an incredible combination of a machine, specially when it can do material handling, and can just keep going for hours and hours
+\item Issues mainly occur due to unscheduled downtime caused by mechanical or electrical failure that might take them out of action for a full day or more.
+\item 90\% of their business is products that they make tons of, so know how to make it, and have optimized their process around it.
+\item Most of the work is done before the actual cutting by a programmer writing the G-code, so that all the ‘operator’ has to do is just get up there and hit ‘Go’, and it goes!
+\item Much more independent than most plasma systems, because of light material, means better handling capabilities
+\item Programmer has a simulation that he/she runs after writing the code, but that is always re-verified by cutting some parts in real life, and the engineer may discover issues outside of the simulation scope, and there is an iterative process between the engineer and the programmer.
+\item Fancy machines, operators can fast forward to any given point in the next and restart their programs, which is extremely useful, since interruptions no longer mean an entire wasted sheet of metal.
+\item High-end CNC incorporates a lot more really cool diagnostics that predictively say when something is running low, or has seen a lot of wear and tear.
+\item Can detect when they’re picked up multiple sheets at once.
+\end{itemize}
+
+The factory-level setup:
+\begin{itemize}
+\item Customers change their minds all the time and decide they want something sooner - currently no way of monitoring how far in which jobs which machines are.
+\item Person whose full time job is to just expedite processes by figuring out what’s not critical that’s taking up machine space right now.
+\item Software called MRP (Materials and Resource Planning) is used to schedule resources, but involves walking around the factory scanning bar codes, punching cards, etc.
+\item Scheduling is a tough process, since things can get changed very fast, and NSA tries to keep their customers please, and keep their business!
+\end{itemize}
+
+
+\newpage
+\section{User Groups} \label{list:UserGroups}
+\begin{enumerate}
+\item Operator
+\begin{itemize}
+\item Physically loads raw materials onto the machine
+\item Loads the G Code, selects the correct part to cut
+\item Depending on system, may 
+\item Have to manually move the torch head to the corner of the sheet
+\item Changes and tunes certain parameters (speed, power, etc.) to improve quality
+\item Monitors cut quality in case something is going wrong
+\item Observes the cutting process, difference between computer simulation and reality, to improve efficiency of producing the particular part on the machine
+\item Troubleshoots machine when errors occur
+\item Performs routine maintenence, replaces consumables, etc.
+\item Usually works with multiple machines; typically does not stand with the machine as the cuts are happening (this insight was from the laser cutting companies, which are admittedly different)
+\end{itemize}
+\item Manager
+\begin{itemize}
+\item Almost no contact with actual machines
+\item Manages personnel
+\item Primary responsibility is scheduling;
+\item Deals with customer service calls, because the final products are usually an integral supply for another downstream operation for the customer
+\begin{itemize}
+\item Trying to expedite orders
+\item Finding out when an order will be ready
+\end{itemize}
+\end{itemize}
+\item Technician
+\begin{itemize}
+\item Trouble shoots and fixes machines when operators cannot
+\item Fixes recurring problems
+\item Accesses the CNC through Microsoft Lync (glorified screen sharing) to diagnose problems
+\item Pulls data from the CNC to analyze
+\item Sometimes called on site if cannot fix problem remotely
+\end{itemize}
+\item OEM
+\begin{itemize}
+\item Purchases CNC from Hypertherm, hooks CNC up to a cutting table, sells tables to metal-cutting companies
+\item Configures CNC to match specific table setup
+\item Handles service calls from the end users
+\end{itemize}
+\end{enumerate}
+
+\newpage
+\section{User Stories} \label{list:UserStories}
+\begin{enumerate}
+\item Operator
+\begin{itemize}
+\item As an operator, I want to receive a notification when the machine is idle, so that I can start a new job.
+\item As an operator, I want to set a cutting process appropriate for my material from my mobile device so that I don't need a manual gas console.
+\item As an operator, I want to receive a notification of a machine error/stop, so that I can respond.
+\item As an operator, I want to check the status of the machine remotely, so that I know how much time is left in the job or if the machine is up or down.
+\item As an operator, I want to choose a specific pierce point to move to, so that I can resume a part from a specific place.
+\item As an operator, I want to track consumable usage (more easily) so that I can plan my jobs more effectively.
+\item As an operator, I want to have an interface for automatically configuring a plasma torch power supply so that I do not have to do it manually.
+\end{itemize}
+\item Manager
+\begin{itemize}
+\item As a floor supervisor I want to know the state of my cutting tables so that I can respond to customer inquiries regarding progess.
+\end{itemize}
+\item Technician
+\begin{itemize}
+\item As a technician, I want to see height position over time, so that I can provide feedback to an end user about installation performance (e.g. slat replacement needed).
+\item As an on-site technician, I want to see a trend of coolant flow data over the previous 2 months so that I can advise if the pump needs to be replaced.
+\end{itemize}
+\item OEM
+\begin{itemize}
+\item As an OEM, I want to upgrade controller software from my mobile device so I can keep a system up to date.
+\item As an OEM, I want to upgrade controller software from my mobile device so I can keep a system up to date.
+\end{itemize}
+\end{enumerate}
+
+
+\newpage
+\section{Research and State of the Art} \label{ResearchandStateoftheArt}
+\begin{center}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width= .5\textwidth]{AS_EdgeProTiPMX105_slide1a}
+\caption{This telling image from the Hypertherm website is indicative of the problem that we intend to tackle - the fact that the operator has to be standing right next to the cutting table for an extended duration of time, while they could be more efficient with their time.}
+\end{center}
+\end{figure}
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width= .5\textwidth]{FANUC}
+\caption{The FANUC remote interface for CNCs, operating on a tablet. FANUC literally replicated the entire interface on the tablet. This works for specific models, the 31i/32i-MODEL B CNCs.
+(FANUC is a high-end manufacturer, and was early to acquire their remote interfacing capabilities.)}
+\end{center}
+\end{figure}
+\newpage
+\begin{figure}[h]
+\begin{center}
+\includegraphics[width= .3\textwidth]{predator_mdc_overview}
+\caption{A rough schematic of the Predator MDC data acquisition system, which highly adaptable, is compatible with several different kinds of CNCs.}
+\end{center}
+\end{figure}
+%\newpage
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width= .5\textwidth]{predator-MDC-Adapter}
+\caption{The data acquisition is done by wireless capable black box that can be installed on site and onto each time (it is fairly expensive, well over \$400 per installation).}
+\end{center}
+\end{figure}
+\newpage
+\begin{figure}[h]
+\begin{center}
+
+\emph{A sensor system and method for collecting and analyzing sensor data transmitted by various distributed sensors in a secure, scalable, and efficient manner}\\
+\vspace{.5in}
+\includegraphics[width= .5\textwidth]{taylorspatenthighlevelmap}
+\caption{An image from Stephen Taylor's patent}
+
+\end{center}
+\vspace{.5in}
+Abstract of Steven Taylor's patent: \\
+
+“Sensors having sensor data to transmit establish concurrent connections with a central server that is configured to collect the sensor data. For each connection, the server generates a single writer thread dedicated to the connection. Each single writer thread accesses the server's underlying file system and writes the sensor data into a sensor file dedicated to the sensor. Each sensor file is written by a single writer thread, but may be concurrently read by multiple reader threads. Analysis threads may also concurrently access the sensor files to perform complex analyses of the stored sensor data. The analysis results are written to dedicated analysis files. The analysis threads act as single writer threads in writing to the analysis files.’
+\end{figure}
+\end{center}
+
+\newpage
+\section{Requirements and Specifications}  \label{tab:RequirementsandSpecifications}
+\begin{center}
+\includegraphics[angle=90,width=\textwidth]{reqsandspecsmatrix}
+\end{center}
+
+\newpage
+\section{Pugh Matrix} \label{tab:PairwiseComparisonofRequirements}
+\includegraphics[width=\textwidth]{pugh}
+
+We used a pairwise analysis to determine which specifications were the most important. A 1 was given for greater importance (row entry more important than colum entry), and a 0 awarded for equal or lesser importance (row entry equally or less important than column entry). We then summed each row and divided this sum by the total number of points awarded to determine a weight based on a 0-1 scale signifying relative importance.
+
+
+\newpage
+\section{High Level Concept Decision Matrix} \label{tab:HighLevelConceptDecisionMatrix}
+\begin{center}
+\includegraphics[angle=90,width=4in]{highlevel}
+
+A discussion is included on the next page
+\end{center}
+
+\newpage
+We ranked each potential solution on a scale of 1-5 with a 5 indicating that this solution met this need very well, and a 1 indicating the solution did not meet the need. We then multiplied each ranking by the weight determined from our Pugh Matrix in Appendix \ref{tab:HighLevelConceptDecisionMatrix}. The Independent Remote application was the highest-ranking solution and thus the one we choose to further investigate. \\
+
+\noindent \emph{Independent Remote Application}: A standalone piece of software built from scratch with a user interface providing solutions to our many user needs.\\
+\emph{Application integrated with Existing Data Service}: Build an application, repurposing existing data collection software to pull data off the CNC.\\
+\emph{Modify Existing CNC Software}: Redesign the existing CNC software.\\
+\emph{Standalone Dedicated Monitoring Device}: A specially designed piece of hardware (embedded system or integrated circuit) whose sole purpose is to provide CNC monitoring, like a pager system. \\
+\emph{Multi-Machine CNC}: Use a single, master CNC to control multiple, distinct cutting tables \\
+that can be connected to various different cutting tables. \\
+\emph{Duplicate CNC away machine}: Move the CNC away from the cutting table yet still maintain a 1:1 relationship between CNC and cutting tables.
+
+
+\newpage
+\section{Software Concept Decision Matrix} \label{tab:SoftwareConceptDecisionMatrix}
+\begin{center}
+\includegraphics[angle=90,width=3in]{softwareconcept}
+\end{center}
+
+
+
+
+\newpage
+\section{JSON API Wiki Page} \label{sec:JSONAPIWikiPage}
+
+\includegraphics[width=\textwidth]{jsonapi}
+
+\newpage
+\section{ScrumDo Project Management Tool} \label{sec:AppendixScrumDo}
+\begin{center}
+	\includegraphics[width=\textwidth]{ScrumDo}
+	Progress completion over time. \\ \textit{Points are assigned based on relative difficulty and magnitude of a ``User Story'' feature}
+\end{center}
+
+
+\section{Application Screen Shots} \label{app:ScreenShots}
+
+\subsection{Dashboard Screenshot} \label{app:dashboard}
+\includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{screenshot_dashboard}
+\subsection{Add CNCs Screenshot} \label{app:AddCncs}
+\includegraphics[width=.9\textwidth,height=.9\textheight,keepaspectratio]{screenshot_addcncs}
+\subsection{Status View Screenshot} \label{app:status}
+\includegraphics[width=.9\textwidth,height=.9\textheight,keepaspectratio]{screenshot_statustab}
+\subsection{Job View Screenshot} \label{app:job}
+\includegraphics[width=.9\textwidth,height=.9\textheight,keepaspectratio]{screenshot_jobtab}
+\subsection{Analytics View Screenshot} \label{app:analytics}
+\includegraphics[height=0.9\textwidth,keepaspectratio,angle=90]{screenshot_analyticstab}
+\subsection{iOS Push Notifications Screenshot} \label{app:ios}
+\begin{center}
+\includegraphics[width=.9\textwidth,height=.9\textheight,keepaspectratio]{screenshot_ios2}
+\end{center}
+\subsection{Android Push Notifications Screenshot} \label{app:android}
+\begin{center}
+\includegraphics[width=.9\textwidth,height=.9\textheight,keepaspectratio]{screenshot_android}
+\end{center}
+
+\newpage
+\section{Language and  Framework Trade Study} \label{tab:LanguageFrameworkAppendix}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{LanguageFrameworkTradeoff}
+\caption{Visualization of the trade-off in choosing programming language and web development framework. Performance data from (http://www.techempower.com/benchmarks/)}
+\end{center}
+\end{figure}
+
+\newpage
+\section{Analytics Tab Profiling} \label{AnalyticsTabProfiling}
+
+With no caching:
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{profile1}
+\caption{Here are the queries used, and the quantitative results.}
+\end{center}
+\end{figure}
+
+\newpage
+Caching database results:
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{profile1}
+\caption{Here are the queries used, and the quantitative results.}
+\end{center}
+\end{figure}
+
+\newpage
+Caching database results and computation results:
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{profile1}
+\caption{Here are the queries used, and the quantitative results.}
+\end{center}
+\end{figure}
+
+\newpage
+\section{Test Suite Code Coverage} \label{sec:AppendixTestCoverage}
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{simplecov1}
+\end{centering}
+\newpage
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{simplecov2}
+\end{centering}
+
+\newpage
+\section{User Interface Feedback Survey} \label{tab:UserInterfaceFeedbackSurvey}
+
+In order to gather qualitative and open-ended feedback from the users of our system, we requested users that used our system to fill out a feedback form, which is reproduced below.
+
+This form consists of the standard Software Usability Scale, and also adds more specific questions regarding the individual pages in our app. It is reproduced below, following the results.
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[width=\textwidth]{SurveyResults.PNG}
+\caption{The averaged scores on the rating-type questions in the survey. Normal categories are in green, and the inverted categories (where a lower score is positive) are colored in red.}
+\end{center}
+\end{figure}
+
+We had 6 respondents to the survey, we received the following feedback for the following open-ended categories:
+
+\begin{itemize}
+\item Any suggestions for different / additional functionality of the dashboard?
+\begin{enumerate}
+\item CNC search by name functionality
+\item Want to know what kind of error I have.
+\item Would like to see the file name of the job running on the CNC.
+\item I liked being able to name the CNCs. However, the name did not propagate back to the server. 
+\end{enumerate}
+
+
+\item Any suggestions for changes / additions to the items in the dashboard view?
+\begin{enumerate}
+\item The progress bar should reflect the actual progress of the job.
+\item Progress bar did not indicate anything for me. Maybe show time elapsed / estimated time left on job. Only shows 3 jobs at any given time on 10.1" screen, maybe compact this view a bit more.
+\item The time it takes to refresh made me think that it wasn’t working. Need user feedback (gas gauge or Please Wait) while the screen refreshes. (this was the screen that appeared after I tapped the notification message on my phone).
+\end{enumerate}
+
+\item Status Tab Feedback
+\begin{enumerate}
+\item Combine Job tab w/ Status tab.
+\item I didn't use this tab.
+\end{enumerate}
+
+\item Jobs Tab Feedback
+\begin{enumerate}
+\item Same information found in Dashboard, not sure how often I would navigate here. Also I would expect this information to appear in the status tab as opposed to having its own tab.
+\item Alternatively provide more details in this view (i.e. cutting process used, special settings, etc)
+\item I don't know if I used this or not. (I used the Android app.) 
+\end{enumerate}
+
+Notification System Feedback
+\begin{enumerate}
+\item Seems to be some delay. The app showed an error, and I was able to clear it before it alerted me - I never received the alert.
+\item I did not receive any notifications once I started the 3 jobs. I continued to say ``running''.
+\item The symbol that appears in the status bar at the top of the phone (it’s a generic android now) could be customized so that I know it’s my CNC. Make it an H or a or something red so that I see it.
+\item Notification text: suggest Tap to view status instead of Click to view feed.
+\end{enumerate}
+
+In addition to the survey responses, we also gathered suggestions from interviewing the Cut Lab operators, resulting in several suggestions that we can pass forward to Hypertherm:
+
+\begin{enumerate}
+\item One point that was brought to our attention was the fact that the aggregation of data would be significantly more useful if it were to be discretized by jobs, as opposed to just being over time. This would allow users to analyze what jobs were running well, and nullify the effects of other scheduling factors in the analysis (effectively creating a notion of ``desired cutting time'' that the empirically measured cutting time could be compared against.
+
+\item One of the operators was of the opinion that the notifications for every single job completion would be distracting, and not very useful. It would be more useful if the user were able to place alerts on specific jobs that they want to be notified of the completion of.
+
+\item Users wanted to be able to sort or search the list of CNCs in the dashboard and add CNC pages, so as to make the interface easier.
+
+\item Timestamped error logs along with details on the errors would be extremely useful as a retrospective tool, for long term improvements to the workflow and feedback to Hypertherm.
+
+
+\end{enumerate}
+The form that was used to gather this data is included on the next page onwards:
+
+\end{itemize}
+
+\includepdf[pages={1-},scale=0.85]{Feedback_Form_Google_Drive.pdf}
+
+
+\newpage
+\section{Simulation Study} \label{sec:SimulationStudy}
+\subsection{Design and Parameters}
+
+The objective of the study was to simulate the workflow of a CNC operator at an end-user site, and be able to quantify the effects of using our system on the efficiency of user and the machine, and to do so without disrupting the current workflow of CNC operators.
+
+From our conversations with the end-users of CNCs, and our observations of what the use-environment is like, we know the following about CNC users:
+\begin{itemize}
+\item Operators start a job on the CNC, and leave the vicinity so the job runs unattended.
+\item There are often more CNCs than operators, so CNCs are not being constantly monitored.
+\item Operators have tasks that draw them away from the vicinity of the CNC.
+\end{itemize}
+
+In order to not affect the current workflow of CNC operators, we decided to create a simulator with virtual CNCs, on which virtual jobs are to be performed. The CNCs function like real CNCs in that they require user action to start a job, have a certain variance in the amount of work that is performed per unit time. There is also a small probability at each time step that these virtual CNCs can go into an error state, which requires a user action to clear and continue with the job.
+
+Subjects were asked to open up the browser simulation on a desktop machine where they were not consistently present, to recreate the physical proximity constraint. The study ran passively, and subjects were asked to check in on the simulation only as often as they would check in on other CNCs that they were running jobs on.
+
+Work shifts typically last 8 hours and since an 8-hour long study did not seem feasible, the study was shortened to an expected duration of 100 minutes, with the length of the jobs scaled down by the same factor:
+
+\begin{itemize}
+\item Each user was assigned 3 virtual CNCs that they run concurrently.
+\item With a uniform probability, CNCs performed either 0, 1 or 2 units of work every minute.
+\item The following jobs had to be performed on the three CNCs respectively:
+\begin{enumerate}
+\item one 20-unit job and two 40-unit jobs.
+\item five 20-unit jobs.
+\item one 40-unit job and one 60-unit job
+\end{enumerate}
+\item The probability of an error at each minute interval was (1/(1.5*k)), where k is the number of units of work involved in the job. Therefore, the probability of encountering an error in the case of each job is slightly less than one half.
+\end{itemize}
+
+Our data aggregation functionality logs each status change on each individual CNC, along with a timestamp of when it occurred, and this will allow us to compute the following metrics from the logged data:
+
+\begin{itemize}
+\item Response time to an error status (before it is cleared and the job continues)
+\item Response time to a job being completed (before another job is started on that machine)
+\item Efficiency of the machine (fraction of time spent in Idle / Running / Error statuses).
+\end{itemize}
+
+\subsection{Logistics}
+
+We had a control group of 12 individuals running the study with 3 virtual CNCs each, and a test group of 7 individuals with 3 CNCs each, as well as either the android or the iOS app that provides immediate notification of CNCs either going into error state, or going back to idle after completing a job.
+
+The study was distributed through a URL that study participants followed, which displayed instructions, and then began the simulation of virtual CNCS, once users clicked on the start link.
+
+Data for the analytics was retrieved post-facto from the Heroku database linked to our deployment. Subject information was collected using a brief Google Form, which is reproduced below. 
+
+\begin{center}
+	\includegraphics[height=4.5in]{study_form}
+\end{center}
+
+The interface of the simulated virtual CNCs was as follows:
+\begin{center}
+	\includegraphics[height=8.5in]{SimulationPage}
+\end{center}
+
+\subsection{Results}
+
+We had 41 people participate in our simulation study, but were forced to discard a lot of the data, since several participants neglected the survey after starting up the simulation page, or after starting up one job on each of the CNCs.
+
+19 of our participants more than 75\% or more of the virtual jobs that they were supposed to run (and of the participants that left jobs incomplete, we kept only the data from the completed jobs).
+There were 12 participants in our control group, and 7 in our test group.
+
+The different metrics were computed as follows:
+Response time to an error status (before it is cleared and the job continues)
+We parsed through the status updates of all the CNCs within a single group, and for each instance where a CNC went into an error state, which was subsequently cleared by the participant, we measured the amount of time spent in the error state.
+
+Response time to a job being completed (before another job is started on that machine)
+This computation was analogous to the above, except we looks at transitions from the idle state into the running state (signally the start of a new job). We also discarded the transitions at the beginning of the first job.
+
+The distributions of the two response time metrics are shown below (with the horizontal time axis spaced logarithmically to give a better visualization of the distribution).
+
+\begin{center}
+	\includegraphics[height=4in]{StudyHistograms}
+\end{center}
+
+The leftward shift from the top plots to the bottom plots (from the Control group to the Test group) is visible in the above plots, and each horizontal unit corresponds to an order of magnitude decrease.
+
+Efficiency of the machine (fraction of time spent in Idle / Running / Error statuses).
+For this metric, we discarded all incomplete jobs, and the idle periods leading up to those, and therefore only used the inter-job idle times for the idle state. The percentages were calculated for each participant in our study, and then averaged across the two different groups to yield the results.
+
+Here is an alternate visualization of the change in efficiency metrics between the control and the test groups:
+
+\begin{center}
+	\includegraphics[width=0.67\textwidth]{StateDoughnutChart.PNG}	
+\end{center}
+
+
+\newpage
+\section{Expenses} \label{sec:Expenses}
+\begin{center}
+\includegraphics[width=0.9\textwidth]{budget}
+\end{center}
+
+
+\newpage
+\addcontentsline{toc}{section}{Appendices: Codebase Documentation} \label{sec:AppendixB}
+
+\section{Rails App Documentation} \label{sec:RailsAppDocumentation}
+
+\subsection{Getting Started} \label{doc:GettingStarted}
+
+Steps to download and run our web application:
+
+To download the application codebase and get set up, a few things need to happen. First, clone the GitHub repository railsapp with the following command:
+
+\begin{lstlisting}[language=bash]
+git clone https://github.com/ENGS89Group19/railsapp.git
+\end{lstlisting}
+
+To develop this Rails application, there are only a few dependencies that you have to manually install: Ruby 2.0, RubyGems,  and Ruby Bundler (a popular gem). Once you have Ruby 2.0 (see http://rvm.io for how to manage Ruby versions), install the Ruby Bundler gem:
+
+\begin{lstlisting}
+gem install bundler\end{lstlisting}
+
+Then you can build the bundle for our specific app by running the following command in the top level of the repository:
+
+\begin{lstlisting}
+bundle install
+\end{lstlisting}
+
+If all goes according to plan, you are ready to run the app. If the ``bundle install'' command fails, install whatever dependencies are missing and try running ``bundle install'' again. Once you see ``Your bundle is complete'' you are ready to continue.
+
+Finally, you will need to run Rails migrations, which modify the database schema, to update your database to the most recent schema. This can be achieved by running:
+
+\begin{lstlisting}
+bundle exec rake db:migrate
+\end{lstlisting}
+
+The ``bundle exec'' command runs the given command, ``rake db:migrate'' in this case, with all of the application's gems included. After migrating the database, you can start the server or open up a Ruby console with the entire Rails framework loaded using:
+
+\begin{lstlisting}
+bundle exec rails server
+\end{lstlisting}
+or
+\begin{lstlisting}
+bundle exec rails console
+\end{lstlisting}
+
+\subsection{Description of Rails MVC Design} \label{doc:DescriptionofRailsMVCDesign}
+
+Our application is built using Ruby on Rails, which follows the standard Model-View-Controller (MVC) application framework \url{http://guides.rubyonrails.org/getting\_started.html}. Models are the objects that represent and store data, Views are the user interfaces that display the data, and Controllers process the user input, generating commands to update models and views. 
+In a Rails application, each model class maps to a table in the relational database. Performing operations on a model objects corresponds to performing queries against the row corresponding to that particular instance’s record in the model’s table. The relationships between these models are maintained as foreign keys in the database tables.
+The controllers are the classes which respond to HTTP requests to render views for the user, handle form input, and tell the models to update records. Each public method in a controller corresponds to a specific HTTP request. Views are the HTML templates that, in conjunction with CSS styling, decide what data gets displayed to the user in what form. In Rails applications, much of the HTML is generated automatically using Embedded Ruby, which is denoted by a .erb extension to the filename of a view (i.e. edit\_title.html.erb).
+
+\subsection{Rails App Repository Structure} \label{doc:RailsAppRepositoryStructure}
+
+The main web application, located in the railsapp repository, has the following directory structure:
+
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{tree_app1}
+\end{centering} 
+
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{tree_app2}
+\end{centering} 
+
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{tree_config}
+\end{centering} 
+
+\begin{centering}
+  \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{tree_spec}
+\end{centering} 
+
+The app directory contains the code that runs the actual application, responding to requests, including all of the models, views, controllers, CSS, and JavaScript. The models, views, and controllers directories contain all the code for their respective components in the MVC architecture. You can expect to find a controller for every model that is publicly exposed through forms or HTTP requests.
+
+Likewise, there exists a view for each method in the controller that a user would directly request by clicking a link. The views rendered by each of the controllers will be located within the folder with the corresponding name in the view directory. These view templates inside this subdirectory will have the same name as their respective action inside the controller. Any file in the view subdirectories beginning with an underscore, i.e. \textit{\_microposts\_feed.html.erb} is a ``partial''. Partials are modules of HTML code that are abstracted into separate files to keep the code compact, organized, and more easily reused. The \textit{app/views/layouts/} subdirectory contains the master \textit{application.html.erb} file which is the base template rendered for every view in the application, including the header, navigation bar, title format, and footer.
+
+The \textit{app/assets/} subdirectory contains all JavaScript, CSS, and image files that are precompiled by Rails as part of its ``asset pipeline''. The files are processed by Rails and concatenated together to allow for faster webpage rendering, greater asset compression, and the use of higher level languages such as CoffeeScript and SASS \cite{rails asset guide}. Additionally, we added custom code so that every view looks in \textit{app/assets/javascripts/} for a JavaScript file named as \textit{controller\_action.js}, where controller is the current controller and action is the action for the view being rendered. For example, the main dashboard page loads \textit{dashboard\_index.js}. This feature let’s you write JavaScript that only executes on its specific view's page.
+
+The \textit{app/helpers/} subdirectory contains code for various auxiliary functions used throughout the application. Views and controllers with matching names can access their corresponding helper files, and the \textit{application\_helper.rb} file is accessible in any other file running in the application. 
+
+The \textit{app/mailers/} directory contains all mailers used by the application. In our case, this is just the \textit{user\_mailer} which emails a new admin user after he or she activates a new company for the first time.
+
+The \textit{app/workers/} directory contains the background workers run through the \textit{Sidekiq} library. These workers can be useful for offloading repetitive computation and any background processing. For instance, when our server reached out to CNCs for status updates (instead of them reaching out to our server), we used a worker to handle that process.
+
+The \textit{config/} directory contains all of the configuration data for the application. The \textit{config/environments} subdirectory has separate config files for the development, production, and test environments. The \textit{config/initializers} directory has important configuration information run when booting up the server, such as the unique secret token for the website and config data for the devise authentication library. The config directory also contains the extremely important ``routes.rb'' file, which contains all the code for routing urls to controller actions through the various types of HTTP requests \cite{rails routing guide}.
+
+The \textit{db/} directory contains the \textit{schema.rb} file which completely describes the current database schema for all models in the application. It also contains the db/migrate directory, which is where all of the migrations go that make changes to the database schema such as adding columns for new model attributes or adding entirely new tables for brand new models.
+
+The \textit{public/} directory is where publically available files for download, such as the Hypertherm Android Application file are housed, and the log directory contains detailed information about every HTTP request and response processed by the application.
+
+Lastly, the \textit{spec/} directory contains the entire RSpec unit-test suite \cite{relish}. The \textit{spec/models} subdirectory contains all model tests, which focus on the response of model attributes, proper validation of inputs, proper creation and destruction of rows in the database tables, and correctness of the associations between models including their various dependencies.
+
+The \textit{spec/controllers/} directory contains all controller tests. Each file in this directory thoroughly tests a single controller, inspecting every single controller action across the entire range of inputs and contexts. The outputs of the action, instance variables assigned by the action, and response rendered by the action are all examined and compared against the expected proper behavior given the context and input parameters.
+
+The \textit{specs/features} directory contains tests for vertical slices of functionality. These tests simulate user interaction with the website using libraries such as Capybara to fill out JavaScript forms, press buttons, and follow links. Here the content of the views is thoroughly examined, the forms are tested to make sure that they pass the correct parameters to the controllers, the links are examined to make sure they point to the correct URLs, the routes are tested to make sure they correctly delegate HTTP requests to the correct controller actions, and the JavaScript is examined to ensure that it correctly dynamically updates the HTML document object model (DOM).
+
+In order to accurately simulate the creation of records in the database, our application uses a library called \textit{FactoryGirl}. These factories allow us to simulate records that behave exactly as the model objects do in the application code, with the same associations, attributes, and validations. The code describing these factories is found in the \textit{spec/factories.rb} file.
+
+The last major component of the project is the \textit{Gemfile}. This file is located in the top level app directory and contains a list of all the external libraries, or \textit{Gems}, and their respective version constraints, used by our application. These gems can be updated and installed by using the ``bundle install'' command from the command-line.
+
+\subsection{Examples of Code Functionality} \label{doc:ExamplesofCodeFunctionality}
+
+\subsubsection{CNC Status Request} \label{doc:CNCStatusRequest}
+This is an example of a user’s interactions with the application, and the various lines of code that are executed on the application server to render the correct view for the user to see.
+After logging in and viewing the dashboard, the user clicks on the status button of the first CNC in the dashboard list. Inside the view \textit{app/views/dashboard/index.html.erb} we see that the content of the page is filled by rendering each cnc partial.
+
+\lstinputlisting[language = Ruby, firstline=2, lastline=3]{index.html.erb}
+
+This tells us to examine the \textit{app/views/cncs/\_cnc.html.erb} partial. Here we can see the the user selected the button linking to the \textit{cnc\_status\_feed\_path} of the cnc being rendered. 
+
+(app/views/cncs/\_cnc 9-10)
+\lstinputlisting[language = Ruby, firstline=9, lastline=10]{_cnc.html.erb}
+
+This is a helper method automatically provided by Rails, meaning that we would like to route to the \textit{status\_feed} action of the \textit{cncs\_controller}, and that we are requesting this action for the particular cnc being referenced. The \textit{config/routes.rb} file directs the GET request to the correct controller action.
+
+(config/routes.rb 6-12)
+\lstinputlisting[language = Ruby, firstline=6, lastline=12]{routes.rb}
+
+The cncs controller then pulls database records of the cnc, its posts for the status feed, and builds a blank micropost. It stores all these objects in instance variables beginning with \textit{@} so that they can be accessed in the view using embedded Ruby.
+
+(app/controllers/cncs\_controller.rb 21-27)
+\lstinputlisting[language = Ruby, firstline=21, lastline=27]{cncs_controller.rb}
+
+By default, because no response or redirect is indicated, Rails then renders the view corresponding to the controller action, \textit{app/views/cncs/status\_feed.html.erb}. This view again fits inside the \textit{app/views/layouts/application.html.erb container}. It stores the id of the cnc in a hidden div, so that JavaScript can make AJAX requests to update the data for the cnc in real time. Beneath the subnav partial, the cnc status is displayed, followed by the form for the new micropost, and finally by the micropost feed partial.
+
+(app/views/cncs/status\_feed.html.erb)
+\lstinputlisting[language = Ruby, firstline=25, lastline=25]{status_feed.html.erb}
+
+Styling for this view is found in the \textit{application.css}, \textit{bootstrap.css}, and \textit{cncs.css files}. In order to dynamically update the status\_feed page in real time, the \textit{cncs\_status\_feed.js} JavaScript is running, requesting data from the \textit{update\_status} and \textit{update\_feed} methods of the \textit{cncs\_controller} with which to update the document object model.
+
+
+\subsubsection{Adding A Detailed View} \label{doc:AddDetailedView}
+
+This is an example of how to add a new detailed CNC view by extending the current sub-navigation structure rather than adding any new navigation features. For example, let us add a \textit{job\_history} detailed view for each cnc. First, we would create the \textit{job\_history} action in the \textit{cncs\_controller}. In this action we would store the necessary data for the view instance variables, most likely including the cnc itself and all the jobs associated with it.
+
+Next, we would create the view itself in the file \textit{app/views/cncs/job\_history.html.erb}. This file should be constructed similarly to the other detailed views, rendering the same \textit{app/views/cncs/\_subnav} partial at the top. Likewise, the subnav partial should be extended to include the link to this new detailed view.
+
+Lastly, the \textit{config/routes.rb} file would need to be extended. A new \textit{GET} route would need to be added for the cnc resource, on line 10.
+
+(config/routes.rb 6-12)
+\lstinputlisting[language = Ruby, firstline=6, lastline=12]{routes.rb}
+
+Those are the basic steps for adding a new feature to the existing application platform.
+
+\subsection{Push Notifications} \label{doc:PushNotifications}
+
+Push notifications are implemented on the server side for iOS and Android inside the models corresponding to those device types in \textit{app/models/ios\_device.rb} and \textit{app/models/android\_device.rb}. 
+
+For iOS, we use a gem called APNS to implement Apple's push notifications protocol. It is initialized in \textit{config/initializers/apns.rb}. The initialization needs to know which host to send notifications to. The options are gateway.sandbox.push.apple.com and gateway.push.apple.com. Since the app is no longer in development mode, we do not need to use the sandbox host. Additionally, Apple requires a certificate to sign push notifications, and this file, called Certificates.pem, should be placed in the top level of the Rails app directory and referenced in the initializer file. Once that is done, APNS is ready to push notifications. This is achieved by calling APNS.send\_notification, which we do in \textit{app/models/ios\_device.rb}.
+
+For Android, we attempted to use various gems, but they were buggy and we ultimately decided it was simplest to implement Google's push notifications protocol ourselves, since it is much simpler than Apple's. The protocol is based on HTTP, and we simply POST to http://android.googleapis.com/gcm/send. The HTTP request body is JSON, with the registration\_ids key referencing an array of device identifiers, and the data key referencing a hash of the data to send to the device. This is implemented in \textit{app/models/android\_device.rb}.
+
+For both types of push notifications, we send the string that the device is to display with the notification and the id of the CNC in question, so that the app can open up that machine’s status feed when the notification is tapped.
+
+\subsection{Testing} \label{doc:Testing}
+
+The RSpec test suite should be run any time code changes are made, before committing code back to the central repository, to ensure that no functionality was unintentionally broken by the new code changes. To run the entire RSpec test suite from the command line, you must first be inside the railsapp directory. Then, you simply execute the command:
+
+\begin{lstlisting}
+rspec spec/
+\end{lstlisting}
+To execute a smaller subset of tests, you must simply specify the directory or file that you would like to test:
+
+\begin{lstlisting}
+rspec spec/controllers/cncs_controller_spec.rb
+\end{lstlisting}
+Every time that the test suite is run, it must first load the Rails environment. This can be costly, especially if running the test suite often. The \textit{Spork} gem was designed to drastically reduce the load time of tests by preloading the rails environment in a separate process. First open a new shell window and cd into the \textit{railsapp} directory. To start the spork server, run the command:
+
+\begin{lstlisting}
+spork
+\end{lstlisting}
+Now, you can run the test suite without loading the rails test environment each time by adding the \textit{--drb} option to the end of the RSpec command:
+
+\begin{lstlisting}
+rspec spec/ --drb
+\end{lstlisting}
+
+\subsection{Deployment} \label{doc:Deployment}
+
+To manage deployment to Heroku, you will need to install the Heroku toolbelt, see \url{https://toolbelt.heroku.com/}. After that is done, the application can be deployed to Heroku using git. Simply let git know about the Heroku repository by running
+
+\begin{lstlisting}
+git remote add heroku git@heroku.com:warm-stream-1161.git
+\end{lstlisting}
+
+Then, you can push the code in your local environment onto \url{http://warm-stream-1161.herokuapp.com} by running
+
+\begin{lstlisting}
+git push heroku master
+\end{lstlisting}
+
+If you have created local migrations, they will not be automatically run. If you have migrations, run the following command to run them on Heroku:
+
+\begin{lstlisting}
+heroku run --app warm-stream-1161 rake db:migrate
+\end{lstlisting}
+
+The ``heroku run'' command tells the Heroku toolbelt to ssh into the Heroku instance and run the command in the console. The toolbelt also allows us to run a console on Heroku:
+
+\begin{lstlisting}
+heroku run --app warm-stream-1161 rails console production
+\end{lstlisting}
+
+Or look at the production logs in real time:
+
+\begin{lstlisting}
+heroku logs --app warm-stream-1161 --tail
+\end{lstlisting}
+
+Note the argument ``--app warm-stream-1161'', this tells the Heroku toolbelt to run the command in the context of the warm-stream-1161 Heroku app, which is necessary when your Heroku account includes multiple apps.
+
+\subsection{Phoenix Simulator} \label{doc:PhoenixSimulator}
+
+In order to quickly and easily test the server, we also coded up a Rails app that simulates the Phoenix communication. To get the simulator, run:
+
+\begin{lstlisting}
+git clone https://github.com/ENGS89Group19/testserver.git
+\end{lstlisting}
+
+Inside this directory, the simulator server and the background process that simulates the phoenix\_http\_proxy can be started and stopped with the simple scripts ``simulatorstart'' and ``simulatorstop''. 
+
+There are two places where the simulator has hardcoded where to send its requests to, and these can either be set to your local Rails server (\url{http://localhost:3000}), the Heroku server (\url{http://warm-stream-1161.herokuapp.com}), or anywhere else. The two locations in the codebase are \textit{app/workers/discovery\_worker.rb:15} and \textit{app/workers/update\_worker.rb:15}. In the past, this value was a command line argument, but this was buggy so we started hard coding it.
+
+The simulator provides a simplified interface into the simulated CNC, which you can view at \url{http://localhost:3001/view}. You can set the Status, Start Time, and Estimated Finish Time parameters that will be sent to the Rails server.
+
+\subsection{Simulation Study} \label{doc:SimulationStudy}
+
+In order to implement our CNC usage study, we created a separate branch of the simulator. If you would like to run the study, inside the testserver repo, run:
+
+\begin{lstlisting}
+git checkout userstudy
+\end{lstlisting}
+
+To get on the study branch. Now you can navigate to \url{http://localhost:3001/study} to view the study. Note that this branch also has hardcoded where send its updates to, located at \textit{app/helpers/study\_helper.rb:4}. If you would like to deploy the study to a Heroku server that is registered as a git remote repository called, say, ``heroku-study'' (we have been deploying it to \url{http://enigmatic-springs-7836.herokuapp.com}), execute:
+
+\begin{lstlisting}
+git push heroku-study userstudy:master
+\end{lstlisting}
+
+This tells git to push the userstudy branch onto Heroku's master branch.
+
+\subsection{Known Issues and Future Work} \label{doc:KnowIssuesandFutureWork}
+
+\underline{Localization}:\\*
+Given Hypertherm's international scale, it will be important for Hypertherm to implement a full set of localization features, to ensure that the application functions correctly in all parts of the world. The language of all text and the timezone in which events are displayed should be adjusted according to the user's location. The ``I18n'' library provided with Rails is the suggested tool with which to implement localization functionality.\\*
+
+\noindent\underline{Parallelizing Request Handling}:\\*
+Currently, one server handles incoming requests from both the CNC clients sending data to the server and user device clients trying to access the website. These two types of requests should be handled by separate servers sharing the same database, one receiving CNC requests and updating the database, the other retrieving information from the database to render for user device requests. \\*
+
+\noindent\underline{Event Data Archival}:\\*
+As more CNCs are connected to the application, the size of the event database storing machine status changes will grow unwieldy and the analytics page will take too long to render. An effective way to shrink this database is to archive old data by storing it offline, to be available upon request, and to compress this data for less granular use on the website. Data from the last month could be available online for each individual day, data from the last year could be compressed to weekly granularity, and data from more than a year ago compressed to monthly granularity. Assuming ten events are generated per day, this would increase the effective storage capacity of the database by approximately 3000\%.\\*
+
+\noindent\underline{CNC Verification}:\\*
+There is currently no way for the application to verify CNCs as legitimate, or as belonging to a certain company, other than the company name they send in their payload. Someone could pretend to be a CNC belonging to a company, rapidly switching status between running and error. This would generate push-notifications for anybody in the company monitoring that particular CNC. An encrypted authentication system for CNCs, similar to the system employed to verify users would help block such attacks. This would require implementation inside the software running next to the Phoenix CNC to coordinate with the application server.\\*
+
+\noindent\underline{Job Status Bar}:\\*
+Currently, the controller that receives updates from Phoenix discards the StartTime and EstimatedFinishTime values, because the finish time has not been implemented yet. When the time is right, lines 150-152 of \textit{app/controllers/cncs\_controller.rb} can be uncommented. Note that at the time of this writing, StartTime is correctly implemented, but sometimes it is a string that can be parsed into a Rails DateTime object, and sometimes it is the string ``No current job''. Simply uncommenting line 150 will not do; special care must be taken for the case of ``No current job''.
+
+\subsection{Tech Stack Improvements} \label{doc:TechStackImprovements}
+
+\noindent\underline{JavaScript and jQuery}:\\*
+Currently, the front end code uses plain JavaScript with the jQuery library to add client side interactivity. jQuery simplifies interacting with the DOM, the browser's internal representation of the HTML on the page, but for complex browser-based JavaScript, relying solely on jQuery leads to a lot of repeated code and spaghetti code. It is our recommendation to consider using a JavaScript framework to manage this complexity. JavaScript frameworks can bind data to the DOM, allow for automatic updates of views when data changes, register for and disseminate events, and much more. There are dozens of options and lots of opinions out there on the internet; we are personally familiar with BackboneJS and AngularJS and recommend looking into them. There is a great website for comparing different JavaScript frameworks called \url{http://todomvc.com}, which shows how to implement a basic todo list using the various frameworks. While this is optional, if you plan on implementing complex browser based functionality, a good framework can save a lot of time and confusion.\\*
+
+\noindent\underline{CSS}:\\*
+In a similar vein, we currently use plain vanilla CSS to style each page. Rails comes built-in with the tools to build SASS CSS. SASS adds programming like features to CSS, like variables, mixins (like functions that generate style rules), nested rule definitions, math, and much more. Taking advantage of these features can simplify stylesheets and make them much more reusable and manageable. Again, going this route is optional, but if the stylesheets become much more complex, it will probably make sense take advantage of the built-in SASS functionality.\\
+
+\noindent\underline{Mobile Compatibility}:\\*
+Another place for improvements is the look of the design on mobile screens. We are using Bootstrap, which provides CSS styles to easily change the look of the app based on different screen sizes. One example is the top menu bar. When the browser is wider than a width defined by Bootstrap, a full horizontal menu is displayed. When the screen is smaller than the cutoff it is deemed a mobile device, and the menu collapses into a drop down that can be shown by clicking a button. While we took care that the general layout and font sizes look good on mobile and desktop devices, a finished product would require a front end developer with an eye for design to add enhancements that only show up on mobile devices to make the app more usable on small screens.
+
+\section{Native Application Documentation} \label{doc:NativeApplicationDocumentation}
+
+\subsection{Android Overview} \label{doc:AndroidOverview}
+
+The Android application follows the conventations laid out in the developer guide for developing a Google Cloud Messaging (GCM) client \cite{gcm} and was built off of the demo GCM client codebase \cite{gcm source code} with modifications to implement the webview which displays our web application \cite{android webview}. The webview implementation is quite straightforward and takes place in \textit{MainActivity.java}. We hard code the webview to open up website currently hosted on heroku, and configure the webview as necessary to allow desired functionality like exposing a connection between the website's JavaScript and the native application.\\
+
+From the native application side, the push notifications work as follows. Upon launching the device, we attempt to register the device if we do not already have a registration ID stored. This is performed within MainActivity using a built in GCM method and providing it our Sender ID. Each application that wishes to use GCM needs to associated with a Google API project which has the GCM service enabled. We use the project's unique project number as the Sender ID in the registration call. You can view the project at \url{https://console.developers.google.com/project} using the \url{hypertherm.cedc@gmail.com} account. Once registered, we store the registration ID inside the application's persistent memory.\\
+
+The application is ready to receive notifications. In the AndroidManifest.xml file, we configure the application to use a broadcast receiver (\textit{GcmBroadcastReceiver.java}) and a background service (\textit{GcmIntentSerivce.java}) to handle notifications. When a notification arrives, it is caught by the receiver which then passes it along to the background service, which creates the notification on the user's phone, providing the text for the notification based on the payload from the GCM message. When the user clicks on the notification, it launches the application, we parse the information stored within the payload, and direct our webview to the correct CNC's status feed.\\
+
+The final piece of the Android application is the interface we define and expose to our website's JavaScript. This interface is defined in WebAppInterface.java and simply contains one function which returns the devices registration ID. In MainActivity.java, we define the connection between our web app and the native app by adding this interface to the webview. Further detail on implementing this interface can be found in the Android webview documentation \cite{android webview}.
+
+\subsection{iOS Overview} \label{doc:iOSOverview}
+
+Our native application for iOS devices implements a simple webview to display our web application. We hardcode the ViewController.m in the ViewDidLoad method to load the webview with the url pointing to our web application. We also create a mapping between the AppDelegate and ViewController upon loading the view so that these two classes can access each other’s data. In general, the AppDelegate class handles events related to the opening, closing, and resuming of the application, while the ViewController class handles the loading of views, including our webview. Both of these classes rely heavily on implementing callback functions for different app and view level events.\\
+
+To implement push notifications, we use the Apple Push Notification (APN) service \cite{apn}. On the native app side, this implementation in the code is quite simple. Upon starting the application, we call a built in function within AppDelegate to register the device for push notifications. This function contacts the APN server through a secure connection which sends a unique device identifier back to the device. If this call returns successfully, our application receives and stores a token unique to this device.\\
+
+The only further detail to the code for this application is how we handle passing the APN device token to our server. We decided to implement a UIWebViewDelagate \cite{apple webview delegate} in our ViewController which provides us with callbacks for when the webview is loading a new url. The shouldStartLoadWithRequest callback is called whenever the webview attempts to process a new request to load a url. We implement some logic within this function to determine if the user has successfully signed in or out on our application. Once we can verify that the user has signed in, we use a built in UIWebView function which allows us to call JavaScript from the current webpage in the webview. We use this JavaScript call to pass the device token to the our website. We have to wait until the user has successfully signed in so that our web application knows which user account to associate with this device. Furthermore, we guarantee that the webpage and JavaScript are loaded before making the JavaScript call by making the call within the webViewDidFinishLoad callback, which acts as its name implies. We use this same method to catch when a user logs out of the application. We once again pass the device token to our web application so that the user's account can be disassociated from the device.\\
+
+While this is the extent of the code for the iOS application, there are many steps that have been taken to allow us to run our application on a user's device, as well as to setup the APN service. The steps taken to allow development and deployment are described in the next section. The steps for enabling push notifications for our application are described in the Provisioning and Development section of the APN documentation \cite{apn}. The Distribution and Development certificates for APN associated with our application have already been created and should not need to be recreated. 
+
+\subsection{Differences Between iOS and Android} \label{doc:DifferencesBetweeniOSandAndroid}
+
+For both operating systems, there is an external server which handles the registering and sending of push notifications. However, it is important to understand some differences in how Android and iOS push notifications work. On the Android side, when we want to send a push notification to a user, our server sends a message to the GCM server, which forwards it to the appropriate device. This message contains a simple payload, but does not actually generate the notification. As described above, when our native Android app receives the GCM message, it generates the notification a user will see on their phone. On the Apple side, we similarly send a message to the APN server which forwards it to the device. However, this message actually contains all the data for the notification, and when this message reaches the device, iOS creates the notification a user sees. This important difference means that for Android, the creation of the notification happens within the native app's codebase, while for Apple the creation happens on our server.
+
+\subsection{Steps for Deployment} \label{doc:StepsforDeployment}
+
+\underline{Android}:\\*
+The steps to continue development and testing of the Android app are quite simple. In order to develop, you will want to install the Android Development Tools (ADT)\cite{adt}. Once installed, you should be able to import our applications source code, connect your device (ensure you have the correct driver installed), and simply press run. In order to continue the testing of the application with beta testers, you simply need to send them the most up to date APK. An updated APK file is generated every time you successfully build the project within ADT. Android users should be able to open this APK from an email, and also from the link we have provided on our website.\\
+
+In order to submit the application into the Android Google Play store, further validation steps will be required. These are outlined in the Distribute-$>$Publish section of the Android Development Center \cite{android publish}. \\
+
+\noindent\underline{iOS}:\\*	
+Before continuing with deployment or development, you will need a Mac running Xcode. There will be some necessary steps to take to setup a development environment on a Mac machine different than the laptop we have been using. The first step to complete before you are able to do anything will be to import the developer profile we used into the Mac you choose to develop with. The necessary file (Hypertherm.developerprofile) can be found in the HyperthermAppiOS github repo. Directions on how to import the profile into Xcode can be found here \cite{apple distribution guide}.\\
+
+Once this developer profile is on your Mac, you will need to follow additional steps to either directly run and debug code onto a plugged in device, or distribute the application to new devices for further beta testing. For either of these options, you will first need to make sure that the device has been registered. You can check in the Certificates, Identifiers, and \& Profiles section of the iOS Developer member center \cite{apple member center} to see if the device is registered. If it is not, you can register it by following the instructions provided the Maintaining Identifiers, Devices, and Profiles section of the App Distribution Guide \cite{apple distribution guide}. Once the device is registered, you can proceed to run the application on a device. If attempting to debug the application through Xcode on a device you have plugged into your development machine, you will first want to make sure you have the correct provisioning profile. You can update/refresh your provisioning profile in Xcode-$>$Preferences-$>$Accounts-$>$View Details \cite{apple distribution guide}. You should now be able to debug the application through Xcode on your connected device. The full documentaiton for this can be found in the Launching Your App on Devices in App Distribution Guide \cite{apple distribution guide}.\\
+
+The steps that must be taken in order to distribute the application to more beta testers are outlined in the Beta Testing Your iOS App section of the App Distribution Guide \cite{apple distribution guide}. We have not created an app record in iTunes connect, created an iOS app Store Package, or run the iTunes connect validation tests. These steps will need to be taken before putting the application in the app store, but are not necessary for the beta testing we have been doing. Once you have registered a device you want to beta test, you will need to update the ``Hypertherm App Beta Testing'' provisioning profile to include the new device. Next, within Xcode you will want to refresh the provisioning profiles. If you have made changes to the application, you need to create a new archive. Once you have an archive, you will need to find it in the Organizer window under Archives, and click Distribute. After choosing ad hoc development and the App ID we have created (Hypertherm Application: 3M638WZ469) you can create a .ipa file. This file can be sent to your beta testers. They can double click it on any computer running iTunes and it will load the application into their iTunes. When they connect their device to their computer, they will be able to install the Hypertherm application.\\
+
+In order to submit the application to the Apple Store, further validation will have to be completed as described above. The full instructions for deployment througth the Apple store can be found in the Submitting Your App section in the App Distribution Guide \cite{apple distribution guide}.
+
+\subsection{Future Work} \label{doc:FutureWork}
+
+For Android, one of our sprint goals was to add functionality for confirmation and alerts to work within the webview. This is needed to allow our web applications implementation of displaying a confirmation window after a user attempts to change a CNC's name. The code for this exists in MainActivity and just needs to be commented in.\\
+
+For iOS, we have identified a potential problem in how the application responds to receiving a push notification with the app already open. In this scenario, the notification is processed and the webview redirects to the status feed for the CNC that generated the notification. This is a poor user experience. In this case, we think there should be some sort of alert that pops up within the app either allowing the user to go to the correct status feed, or to ignore the alert. This would be implemented in the didReceiveRemoteNotification method under the ``active'' case.
+
+\end{document}
+
