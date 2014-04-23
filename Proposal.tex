@@ -119,7 +119,7 @@ Random forests are a more thoroughly studied application of ensemble learning. A
 \end{center}
 \end{figure}
 
-Thus, the generalization error of an ensemble can be improved by increasing the variance between the model predictions or by increasing the variance between the models. In a random forest, each individual tree is a worse predictor than a deterministic decision tree trained on the full data. However, the variance between the models allows the ensemble to be a far more accurate predictor. The trees learn different subtle nonlinearities within the data and become very good at predicting certain classes very well when certain combinations of inputs are present. Thus, for any given example, a small subset of trees in the forest will be very good predictors, with the remainder of the forest averaging out to random noise.
+Thus, the generalization error of an ensemble can be improved by increasing the variance between the model predictions or by increasing the variance between the models. In a random forest, each individual tree is a worse predictor than a deterministic decision tree trained on the full data. However, the variance between the models allows the ensemble to be a far more accurate predictor. The trees learn different subtle nonlinearities within the data and become very good at predicting certain classes very well when certain combinations of inputs are present. Thus, for any given example, a small subset of trees in the forest will be very good predictors, with the remainder of the forest averaging out to random noise. Therefore, we plan on exploring the use of an ensemble of deep networks to facilitate better performance in the context of different types of corruption.
 
 \section{Experiments}
 
