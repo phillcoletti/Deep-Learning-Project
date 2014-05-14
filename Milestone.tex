@@ -155,15 +155,15 @@ We plan on using the results obtained in Wan et al. (2013) using Dropout and mod
 \section{Milestone}
 
 \subsection{Previous goal}
-By our milestone, we expected to have implemented the Dropout model and tested all the different types of corruption on the MNIST and CIFAR-10 data sets. Here, instead,  we restrict our focus to the MNIST data set in order to thoroughly explore our approach before moving on to a more challenging problem.
+By our milestone, we expected to have implemented the Dropout model and tested all the different types of corruption on the MNIST and CIFAR-10 data sets. Here, instead,  we restrict our focus to the MNIST data set in order to more thoroughly explore our proposed improvement before moving on to a more challenging problem.
 
 \subsection{Training details}
-We used a consistent architecture and set of training parameters throughout our experiments, which were performed exclusively on the MNIST digit set. Specifically, we used a 784-800-800-10 architecture with a softmax output layer and a hyperbolic tangent activation function unless otherwise specified, as we did experiment with sigmoid and rectified linear units as well. Our training schedule was taken from Wan et al. (2013) and can be seen in Table 1. We used a constant momentum of 0.9. While we varied the dropout rate in the hidden layers, we always used a rate of 0.2 for the input units.
+We used the same architecture and set of training parameters throughout our experiments, which were performed exclusively on the MNIST digit set. Specifically, we used a 784-800-800-10 architecture with a softmax output layer and a hyperbolic tangent activation function unless otherwise specified, as we did experiment with sigmoid and rectified linear units as well. Our training schedule was taken from Wan et al. (2013) and can be seen in Table 1. We used a constant momentum of 0.9. While we varied the dropout rate in the hidden layers, we always used a rate of 0.2 for the input units, as in Hinton et al. (2012).
 
 \begin{table}[ht]
 \caption{Training schedule}
 \begin{center}
-\begin{tabular}{ l |  l |  l  | l | l | l | l | l }
+\begin{tabular}{| l |  l |  l  | l | l | l | l | l |}
 \hline
 Learning rate & 0.1 & 0.05 & 0.01 & 0.005 & 0.001 & 0.0005 & 0.0001 \\
 \hline
@@ -174,7 +174,7 @@ Number of epochs & 800 & 600 & 400 & 100 & 50 & 20 & 20 \\
 \end{table}
 
 \subsection{Dropout as a regularizer}
-As in Hinton et al. (2012), using dropout leads to worse training error, but better performance on the test set (See Figures 7 and 8). In contrast, we don't see any overfitting without dropout. This could be due to our different learning schedule, and perhaps after more iterations we would see overfitting as well. Similar results were obtained from training our different corruption types (See Figure 9).
+As in Hinton et al. (2012), using dropout leads to worse training error, but better performance on the test set (See Figure 6). In contrast, we don't see any overfitting without dropout. This could be due to our different learning schedule, and perhaps after more iterations we would see overfitting as well. Similar results were obtained from training our different corruption types (See Figure 7).
 
 \begin{figure}
 \centering
@@ -202,7 +202,7 @@ As in Hinton et al. (2012), using dropout leads to worse training error, but bet
 \end{figure}
 
 \subsection{Filters and corruption type}
-We experimented with a variety of corruption types. In particular, we looked at dropout, salt-and-pepper noise, gaussian noise, and random values on the interval [0, 1]. The weights of the units in the first hidden layer of the networks learned in these cases differ. Qualitatively, this difference can be seen in Figure 9, where the weights are visualized as image filters. Compared with no corruption and adding gaussian noise, dropout, salt-and-pepper noise, and random noise learn more interesting features that appear to detect edges and blobs.
+We experimented with a variety of corruption types. In particular, we looked at dropout, salt-and-pepper noise, gaussian noise, and random values on the interval [0, 1]. The weights of the units in the first hidden layer of the networks learned in these cases differ. Qualitatively, this difference can be seen in Figure 8, where the weights are visualized as image filters. Compared with no corruption and adding gaussian noise, dropout, salt-and-pepper noise, and random noise learn more interesting features that appear to detect edges and blobs.
 
 \begin{figure}
 \begin{center}
@@ -212,7 +212,7 @@ We experimented with a variety of corruption types. In particular, we looked at 
 \end{figure}
 
 \subsection{Filters and dropout rate}
-We varied the dropout rate for each of our corruption types to determine what works best. In specific, we tried values of 0.25, 0.5, and 0.75. Interestingly, as the dropout rate was increased, the network filters became more pronounced for dropout, salt-and-pepper noise, and random noise (See Figure 10). The filters for gaussian noise showed no change with the rate of dropout.
+We varied the dropout rate for each of our corruption types to determine what works best. In specific, we tried values of 0.25, 0.5, and 0.75. Interestingly, as the dropout rate was increased, the network filters became more pronounced for dropout, salt-and-pepper noise, and random noise (See Figures 9 and 10). The filters for gaussian noise showed no change with the rate of dropout.
 
 \begin{figure}
 \begin{center}
@@ -229,12 +229,12 @@ We varied the dropout rate for each of our corruption types to determine what wo
 \end{figure}
 
 \subsection{Test performance}
-Given the qualitative difference in the filters learned with higher dropout rates, we might expect that performance would follow a similar trend. However, this was not the case. As in Hinton et al. (2012), dropout performed best on the test set with a rate of 0.5. As shown in Figures \ref{fig:rate,error} and \ref{fig:corruption,error}, it first appeared that the test error for all the other corruption types decreased with the dropout rate, and that the network trained with no corruption outperformed all types of noise other than standard dropout. We performed prediction using for the random, salt \& pepper, and gaussian corrupted networks by performing a feed-forward pass through the network with no corruption added. Table \ref{tab:testErrorOrig} shows these initial quantitative results.
+Given the qualitative difference in the filters learned with higher dropout rates, we might expect that performance would follow a similar trend. However, this was not the case. As in Hinton et al. (2012), standard dropout performed best on the test set with a rate of 0.5. As shown in Figures \ref{fig:rate,error} and \ref{fig:corruption,error}, it first appeared that the test error for all the other corruption types decreased with the dropout rate, and that the network trained with no corruption outperformed all types of noise other than standard dropout, with a classification error of 0.0302 on the test set. We performed prediction using for the random, salt \& pepper, and gaussian corrupted networks by performing a feed-forward pass through the network with no corruption added. Table \ref{tab:testErrorOrig} shows these initial quantitative results.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\textwidth]{dropoutRateAndTestError.png}
-\caption{Dropout rate affects test performance. The test error shown for Salt \& Pepper and Random noise was computed using a single model prediction without corruption, not the more accurate multiple run averaging method with corruption included.}
+\caption{Dropout rate affects test performance. The test classification error shown for Salt \& Pepper and Random noise was computed using a single model prediction without corruption, not the more accurate multiple run averaging method with corruption included.}
 \label{fig:rate,error}
 \end{center}
 \end{figure}
@@ -247,7 +247,28 @@ Given the qualitative difference in the filters learned with higher dropout rate
 \end{center}
 \end{figure}
 
-We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results (See Figure 13). ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the ``mean'' dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training. 
+\begin{table}
+\caption{Test classification error using prediction averaged over 200 feed-forward passes with corruption}
+\label{tab:testErrorOrig}
+\begin{center}
+\begin{tabular}{| l |  l |  l  | l |}
+\hline
+Corruption Rate & 0.25 & 0.5 & 0.75 \\
+\hline
+\hline
+Dropout & 0.0210 & 0.0197 & 0.0225 \\
+\hline
+Salt \& Pepper & 0.0284 & 0.0327 & 0.0437 \\
+\hline
+Random & 0.0328 & 0.0324 & 0.0386 \\
+\hline
+Gaussian & 0.0367 & 0.0437 & 0.0401 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results. ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the ``mean'' dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training. 
 
 Each layer $i$ in the network has $J_i$ units, each with activation $a_{ij}$. During prediction, we perform the adjustment to the activations(using all training examles $x^{(k)}$) as follows: 
 \begin{align*}
@@ -256,11 +277,45 @@ Each layer $i$ in the network has $J_i$ units, each with activation $a_{ij}$. Du
   \hat{a_{ij}} &= R_i * a_{ij} \;\; \forall \; i , J_i
 \end{align*}
 
-This manipulation did not work, and actually led to poorer results, with a test error for salt and pepper noise of ***INSERT NUMBER OR TABLE***.
+Unfortunately, this manipulation did not work, and actually led to poorer results, as shown in table \ref{tab:testErrorAdj}.
 
-The brute force approach to solve this prediction problem is to run the prediction with the noise included multiple times. We assign a prediction label by taking averaging the output of the softmax layer from all runs and assigning the class with the highest average probability. This approach is more computationally expensive, but accurately represents the true network prediction. Figure \ref{fig:predAvg} demonstrates that this prediction method approaches the optimal error after averaging about 30-50, although more networks are needed if the dropout rate is higher. The results in table \ref{tab:predAvg} also confirm that this method accurately reproduces the network's true error rate, as it produces the same test error as Hinton's method of halving the weights during dropout prediction. Furthermore, these results confirm that a corruption rate of 0.5 is yields better generalization error than rates of 0.25 and 0.75, which aligns with the results from Hinton et al (2012) and Wan et al (2013).
+\begin{table}[ht]
+\caption{Test classification error using average activation adjustment}
+\label{tab:testErrorAdj}
+\begin{center}
+\begin{tabular}{| l |  l |  l  |}
+\hline
+ & No adjustment & Average activation adjustment \\
+\hline
+\hline
+Salt \& Pepper & 0.0327 & 0.0399 \\
+\hline
+Random & 0.0324 & 0.0423 \\
+\end{tabular}
+\end{center}
+\end{table}
 
-\begin{figure}
+An alternative approach to solving this problem is to run the prediction, with the noise, included multiple times. We assign a class label by averaging the output of the softmax layer from all runs and assigning the class with the highest average probability. This approach is more computationally expensive, but accurately represents the true network prediction for all corruption types. Figure \ref{fig:predAvg} demonstrates that this prediction method approaches the optimal error after averaging between 30 and 50 predictions, although more are needed if the dropout rate is higher. The results in Table \ref{tab:predAvg} also confirm that this method accurately reproduces the network's true error rate, as it produces the same test error as Hinton's method of halving the weights during prediction with standard dropout. Furthermore, these results confirm that a corruption rate of 0.5 is yields better generalization error than rates of 0.25 and 0.75 for all corruption types, which aligns with the results from Hinton et al (2012) and Wan et al (2013).
+
+\begin{table}[ht]
+\caption{Test classification error using prediction averaged over 200 feed-forward passes with corruption}
+\label{tab:predAvg}
+\begin{center}
+\begin{tabular}{ l |  l |  l  | l }
+\hline
+Corruption Rate & 0.25 & 0.5 & 0.75 \\
+\hline
+\hline
+Dropout & 0.0213 & 0.0192 & 0.0221 \\
+\hline
+Salt \& Pepper & 0.0239 & 0.0211 & 0.0315 \\
+\hline
+Random & 0.0264 & 0.0220 & 0.0269 \\
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{figure}[]
 \centering
 \begin{minipage}{.75\textwidth}
   \vspace*{\fill}
@@ -279,31 +334,19 @@ The brute force approach to solve this prediction problem is to run the predicti
 \label{fig:predAvg}
 \end{figure}
 
-\begin{table}
-\caption{Test classification error using prediction averaged over 200 feed-forward passes with corruption}
-\label{tab:predAvg}
-\begin{center}
-\begin{tabular}{ l |  l |  l  | l }
-\hline
-Corruption Rate & 0.25 & 0.5 & 0.75 \\
-\hline
-Dropout & 0.0213 & 0.0192 & 0.0221 \\
-\hline
-Salt \& Pepper & 0.0239 & 0.0211 & 0.315 \\
-\hline
-Random & 0.0264 & 0.0220 & 0.0269 \\
-\end{tabular}
-\end{center}
-\end{table}
-
 \subsection{Test performance and pretraining}
 We experimented briefly with pretraining to determine whether there was an interaction with the corruption type that would produce better results than standard dropout. While pretraining led to better test performance, as expected, it did so across the board, with dropout still the clear winner among the various sources of noise.
 
+\subsection{Milestone conclusions}
+The results achieved thus far indicate that standard Dropout is the most effective type of corruption for use in a supervised fine-tuning setting. However, salt \& pepper and random corruption performed better than the network trained with standard backpropagation and no corruption. Thus, we will continue to investigate the use of these types of corruption as we continue testing. Gaussian noise performed poorly, and we will no longer include it in future tests.
+
 \subsection{Challenges}
-Aside from those already mentioned, some of the challenges we faced in our project were the slow training speed, as our MATLAB implementation takes about three days to converge, randomizing the networks, as MATLAB appears to not automatically reset its seed state, and setting the training parameters, as these varied between papers and seemed to interact with our choice of corruption type.
+Due to our slow MATLAB implementation (2000 epochs takes approximately two days), we were hindered in our effort to make rapid progress towards our milestone goals. We also had difficulty randomizing the networks. Despite training five separate instances of each network setup (same type of corruption type and rate), all networks of the same setup were exactly identical. We have since learned that we must explicitly seed the MATLAB rand function or the result is completely deterministic. Unfortunately, we were unable to exactly replicate the results from Hinton et al (2012), as we used different training parameters.
 
 \subsection{Next steps}
-Our next steps entail improving the performance of individual networks by modifying our training setup, exploring the variance of models produced under different corruption types and their potential benefit to ensemble learning, and attempting to approach or surpass state-of-the-art performance by using tricks like a CNN feature extractor and data augmentation. Additionally, we hope to extend our work to the CIFAR-10 data set, to validate our findings on MNIST.
+For the final, we will continue to improve the performance of individual networks by adjusting our training parameters to match those of Hinton et al (2012) instead of that of Wan et al (2013). We will then seek to explore the variance of the models produced under different corruption types and rates in order to assess how well they would perform in an ensemble learning setting. One possible method to improve performance is to train a network by combining all corruption types, stochastically selecting a corruption type for each mini-batch during training.
+
+After testing these methods on MNIST, we will attempt to approach or surpass state-of-the-art performance by using a CNN feature extractor and data augmentation. Lastly, we hope to extend our work to the CIFAR-10 data set, to validate our findings on MNIST.
 
 
 
