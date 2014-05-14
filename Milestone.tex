@@ -160,7 +160,7 @@ By our milestone, we expected to have implemented the Dropout model and tested a
 \subsection{Training details}
 We used a consistent architecture and set of training parameters throughout our experiments, which were performed exclusively on the MNIST digit set. Specifically, we used a 784-800-800-10 architecture with a softmax output layer and a hyperbolic tangent activation function unless otherwise specified, as we did experiment with sigmoid and rectified linear units as well. Our training schedule was taken from Wan et al. (2013) and can be seen in Table 1. We used a constant momentum of 0.9. While we varied the dropout rate in the hidden layers, we always used a rate of 0.2 for the input units.
 
-%\begin{table}[!ht]
+%\begin{table}[ht]
 %\caption{Training schedule}
 %\begin{center}
 %\begin{tabular}{ l |  c |  r }
@@ -172,14 +172,6 @@ We used a consistent architecture and set of training parameters throughout our 
 %\end{tabular}
 %\end{center}
 %\end{table}
-
-%TESTING
-%\begin{tabular}{l | c || r | }
-%  1 & 2 & 3 \\
-%\hline
-%  4 & 5 & 6 \\
-%  7 & 8 & 9 \\
-%\end{tabular}
 
 \subsection{Dropout as a regularizer}
 As in Hinton et al. (2012), using dropout leads to worse training error, but better performance on the test set (See Figures 7 and 8). In contrast, we don't see any overfitting without dropout. This could be due to our different learning schedule, and perhaps after more iterations we would see overfitting as well. Similar results were obtained from training our different corruption types (See Figure 9).
@@ -254,11 +246,7 @@ Given the qualitative difference in the filters learned with higher dropout rate
 \end{figure}
 
 \subsection{Test performance and corruption type}
-We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results (See Figure 13). ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the "mean" dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training (See equation below). However, this manipulation did not work, and actually led to poorer results.
-
-\begin{equation*}
-	Adjustment factor = \frac{(1 - dropoutRate) * a-bar + dropoutRate * d-bar}{a-bar}
-\end{equation*}
+We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results (See Figure 13). ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the "mean" dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training. However, this manipulation did not work, and actually led to poorer results.
 
 \subsection{Test performance and pretraining}
 We experimented briefly with pretraining to determine whether there was an interaction with the corruption type that would produce better results than standard dropout. While pretraining led to better test performance, as expected, it did so across the board, with dropout still the clear winner among the various sources of noise.
