@@ -186,7 +186,38 @@ Given the qualitative difference in the filters learned with higher dropout rate
 
 
 \subsection{Test performance and corruption type}
-We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results (See Figure 13). ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the "mean" dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training. However, this manipulation did not work, and actually led to poorer results.
+We also tried varying the type of activation function used in our network. Using sigmoid units produced similar results (See Figure 13). ReLUs, however, did not perform well due to the fact that the salt-and-pepper and random noises do not extend obviously to values without a max bound. Upon obtaining these results, we suspected that one issue with our approach is how we performed prediction with networks that utilized salt-and-pepper and random noise. In Hinton et al. (2012), test time prediction with the ``mean'' dropout network was performed by halving the weights to account for twice as many units being active. This simple adjustment does not generalize to our setting where the expected value of units corrupted with salt-and-pepper and random noise is 0.5, not 0. Our first attempt at solving this problem was to use a weighted average of the expected average activation in each layer over the training set and the expected value of corrupted units in order to tweak the input into each hidden unit to be within roughly the same range as was the case during training. 
+
+Each layer $i$ in the network has $J_i$ units, each with activation $a_{ij}$. During prediction, we perform the adjustment to the activations as follows: 
+\begin{align*}
+  \overline{a}_i &= \frac{1}{N*J_i}\displaystyle\sum_{k=1}^{N}\displaystyle\sum_{j=1}^{J_i}a_{ij}(x^{(k)}) &\text{averaging over all training examples $x^{(k)}$} \\
+  R_i &= \frac{(1 - dropoutRate) * \overline{a}_i + dropoutRate * E\big[corruption\big]}{\overline{a}_i} \\
+  \hat{a_{ij}} &= R_i * a_{ij} \;\; \forall \; i , J_i
+\end{align*}
+
+This manipulation did not work, and actually led to poorer results, with a test error for salt and pepper noise of ***INSERT NUMBER OR TABLE***.
+
+The brute force approach to solve this prediction problem is to run the prediction with the noise included multiple times. We assign a prediction label by taking averaging the output of the softmax layer from all runs and assigning the class with the highest average probability. This approach is more computationally expensive, but accurately represents the true network prediction. Figure \ref{fig:predAvg} demonstrates that this prediction method approaches the optimal error after averaging about 30-50, although more networks are needed if the dropout rate is higher. The results in table *** also confirm that this method accurately reproduces the network's true error rate, as it produces the same test error as Hinton's method of halving the weights during dropout prediction. Furthermore, these results confirm that a corruption rate of 0.5 is yields better generalization error than rates of 0.25 and 0.75, which aligns with the results from Hinton et al (2012) and Wan et al (2013).
+
+\begin{figure}
+\centering
+\begin{minipage}{.75\textwidth}
+  \vspace*{\fill}
+  \centering
+  \includegraphics[width=.75\textwidth]{predAvg_rate=025}
+  \subcaption{25\% of hidden units in each layer corrupted}
+  \label{fig:predAvg1}
+  \includegraphics[width=.75\textwidth]{predAvg_rate=05}
+  \subcaption{50\% of hidden units in each layer corrupted}
+  \label{fig:predAvg2}
+  \includegraphics[width=.75\textwidth]{predAvg_rate=075}
+  \subcaption{75\% of hidden units in each layer corrupted}
+  \label{fig:predAvg3}
+\end{minipage}
+\caption{Test error achieved by averaging predictions from the same model over multiple runs. Different random combinations of hidden units are corrupted during each run according to the corruption type and corruption rate}
+\label{fig:predAvg}
+\end{figure}
+%table
 
 \subsection{Test performance and pretraining}
 We experimented briefly with pretraining to determine whether there was an interaction with the corruption type that would produce better results than standard dropout. While pretraining led to better test performance, as expected, it did so across the board, with dropout still the clear winner among the various sources of noise.
