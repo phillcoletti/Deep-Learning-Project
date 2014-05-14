@@ -1,0 +1,20 @@
+Filters and graphs key:
+No pretraining (random initialization)
+Final networks
+
+					Train Error:		Test Error:
+Drop 0.5 (tanh) #3		0.000150			0.019700
+Salt Pepper 0.5 (tanh) #3	0.015733			0.032700
+Gaussian 0.5 (tanh) #2	0.000000			0.040700
+Random 0.5 (tanh) #5		0.012083			0.032400
+NoDrop (Drop 0) (tanh) #4	0.000083			0.030200
+
+Other filters (all tanh)
+Drop 0.25 (tanh) #5
+Drop 0.75 (tanh) #5
+SP 0.25 (tanh) #2
+SP 0.75 #5
+Random 0.25 #5
+Random 0.75 #5
+Gaussian 0.25 #5
+Gaussian 0.75 #5
