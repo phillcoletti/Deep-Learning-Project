@@ -356,12 +356,31 @@ After testing these methods on MNIST, we will attempt to approach or surpass sta
 \subsection{Comparison of Corruption Types}
 
 \subsection{Ensemble Learning}
+Based on the impressive results achieved by Wan et. al (2003), we sought to improve classification performance by polling an ensemble of neural networks. The order of input examples, initialization, and corruption masks were all randomized, so that each network in the ensemble would be different. We ran several series of experiments to determine how corruption type, corruption rate, and polling method effected the performance of the ensemble. 
 
 \subsubsection{Corruption Type}
 
+\begin{figure}
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=150pt]{ensemble0.5.png}
+  \caption{Filters learned with salt-and-pepper noise.}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=150pt]{ensemble07}
+  \caption{Filters learned with zero-masking.}
+  \label{fig:sub2}
+\end{subfigure}
+\caption{Features learned in the first hidden layer (filters) on the MNIST handwritten digit set.}
+\label{fig:test}
+\end{figure}
+
 \subsubsection{Corruption Rate}
 
-\subsubsection{Voting Method}
+\subsubsection{Network Polling Methods}
 
 \subsection{Conclusions}
 
