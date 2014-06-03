@@ -89,16 +89,16 @@ A natural question that arises from these studies is whether different types of 
   \centering
   \includegraphics[width=150pt]{SDAE_Filters_SaltAndPepperNoise.png}
   \caption{Filters learned with salt-and-pepper noise.}
-  \label{fig:sub1}
+  \label{fig:filters_sp}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=150pt]{SDAE_Filters_ZeroMasking.png}
   \caption{Filters learned with zero-masking.}
-  \label{fig:sub2}
+  \label{fig:filters_sp}
 \end{subfigure}
 \caption{Features learned in the first hidden layer (filters) on the MNIST handwritten digit set.}
-\label{fig:test}
+\label{fig:filters}
 \end{figure}
 
 Interestingly, the Dropout technique shares many characteristics with training SDAEs. In practice, both techniques involve setting some number of the (input or hidden) units in every layer to 0. From a theoretical perspective, they both force the model to learn about the distribution underlying the data without being able to rely on having complete information. In order to make up for these lost values, the network captures deeper structures that can explain how the inputs relate to each other. Such regularities are more likely to be representative of the data distribution, and therefore generalize well to new examples at test time. While different types of corruption have been tested in the context of SDAEs, they have not been in Dropout. Therefore, we would propose to explore different types corruptions in Dropout to see if it improves performance, as it did with SDAEs.
@@ -136,16 +136,16 @@ The datasets we plan to use are the MNIST handwritten digit set in order to comp
   \centering
   \includegraphics[width=150pt]{MNIST_Image.png}
   \caption{Examples from the MNIST handwritten digit set.}
-  \label{fig:sub1}
+  \label{fig:mnist}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=150pt]{CIFAR-10_Image.png}
   \caption{Example images from the CIFAR-10 data set}
-  \label{fig:sub2}
+  \label{fig:cifar10}
 \end{subfigure}
 \caption{Examples from the two data sets we plan on using.}
-\label{fig:test}
+\label{fig:datasets}
 \end{figure}
 
 \subsection{Baselines}
@@ -182,16 +182,16 @@ As in Hinton et al. (2012), using dropout leads to worse training error, but bet
   \centering
   \includegraphics[width=150pt]{trainingTestErrorNoDropoutTanh.png}
   \caption{Training and test error without dropout}
-  \label{fig:sub1}
+  \label{fig:train_nodrop}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
   \includegraphics[width=150pt]{trainingTestError05DropTanh.png}
   \caption{Training and test error with 0.5 dropout}
-  \label{fig:sub2}
+  \label{fig:train_05}
 \end{subfigure}
 \caption{Dropout improves test performance}
-\label{fig:test}
+\label{fig:train}
 \end{figure}
 
 \begin{figure}
@@ -291,6 +291,7 @@ Unfortunately, this manipulation did not work, and actually led to poorer result
 Salt \& Pepper & 0.0327 & 0.0399 \\
 \hline
 Random & 0.0324 & 0.0423 \\
+\hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -301,7 +302,7 @@ An alternative approach to solving this problem is to run the prediction, with t
 \caption{Test classification error using prediction averaged over 200 feed-forward passes with corruption}
 \label{tab:predAvg}
 \begin{center}
-\begin{tabular}{ l |  l |  l  | l }
+\begin{tabular}{| l |  l |  l  | l |}
 \hline
 Corruption Rate & 0.25 & 0.5 & 0.75 \\
 \hline
@@ -311,6 +312,7 @@ Dropout & 0.0213 & 0.0192 & 0.0221 \\
 Salt \& Pepper & 0.0239 & 0.0211 & 0.0315 \\
 \hline
 Random & 0.0264 & 0.0220 & 0.0269 \\
+\hline
 \end{tabular}
 \end{center}
 \end{table}
@@ -356,31 +358,138 @@ After testing these methods on MNIST, we will attempt to approach or surpass sta
 \subsection{Comparison of Corruption Types}
 
 \subsection{Ensemble Learning}
-Based on the impressive results achieved by Wan et. al (2003), we sought to improve classification performance by polling an ensemble of neural networks. The order of input examples, initialization, and corruption masks were all randomized, so that each network in the ensemble would be different. We ran several series of experiments to determine how corruption type, corruption rate, and polling method effected the performance of the ensemble. 
+Based on the impressive results achieved by Wan et. al (2003), we sought to improve classification performance by polling an ensemble of neural networks. The order of input examples, initialization, and corruption masks were all randomized, so that each network in the ensemble would be different. We ran several series of experiments to determine how corruption type, corruption rate, and polling method effected the performance of the ensemble.
+
+In all of the below experiments, an ensemble of networks was trained independently. When determing the accuracy of the network with an ensemble size of $k$, we took all $n \choose k$ possible combinations of the $n$ available networks with identical hyperparameters (i.e. corruption type, corruption rate, etc.) and averaged the error of these $n \choose k$ ensembles. Thus, for size 1, we simply take the average of all individual model error rates. For size $n$, we take the error rate of the ensemble that includes all networks of the desired hyperparameters.
 
 \subsubsection{Corruption Type}
+
+At both the 0.5 and 0.7 corruption rates, dropout performed best, random performed second best, and salt \& pepper performed worst at all ensemble sizes (Figure \ref{fig:ensemble_corruption_type}). This is a slightly surprising result, as Salt \& Pepper noise outperformed random noise in most experiments during the milestone. It is possible that the longer training schedule allowed the random noise model to fully converge more during this set of experiments.
+
+It is also worth noting that we cannot draw firm conclusions about the performance of salt \& pepper noise from these curves, as they use a much smaller ensemble size due to technical problems with the cluster. At both the 0.5 and 0.7 corruption rates, the ensemble error appears to be dropping sharply as the ensemble size increases. More data is needed to determine whether the performance of these ensembles would continue to improve if more models were to be included.
 
 \begin{figure}
 \centering
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=150pt]{ensemble0.5.png}
-  \caption{Filters learned with salt-and-pepper noise.}
-  \label{fig:sub1}
+  \includegraphics[width=\textwidth]{ensemble05}
+  \caption{50\% of hidden units corrupted}
+  \label{fig:ect05}
 \end{subfigure}%
 \begin{subfigure}{.5\textwidth}
   \centering
-  \includegraphics[width=150pt]{ensemble07}
-  \caption{Filters learned with zero-masking.}
-  \label{fig:sub2}
+  \includegraphics[width=\textwidth]{ensemble07}
+  \caption{70\% of hidden units corrupted}
+  \label{fig:ect07}
 \end{subfigure}
-\caption{Features learned in the first hidden layer (filters) on the MNIST handwritten digit set.}
-\label{fig:test}
+\caption{Ensemble prediction error rate vs. ensemble size. Ensemble prediction was done using mean polling of softmax output. Some models did not finish running, so the curves are not complete}
+\label{fig:ensemble_corruption_type}
 \end{figure}
 
 \subsubsection{Corruption Rate}
 
+In this set of experiments, we examine the effect of corruption rate on ensemble learning.Across all corruption types, lower dropout rates appeared to outperform higher corruption rates (Figure \ref{fig:ensemble_corruption_rate}). Due to the lack of models that completed training for random and salt \& pepper noise, we are unable to tell if those corruption types behave significantly differently than standard dropout.
+
+For the standard dropout ensembles, dropout rates of 0.4 and 0.5 perform very similarly. We would expect to see a dropout rate of 0.5 perform better at all ensemble sizes for two reasons. Hinton et al. (2010) discovered that 0.5 is the ideal dropout rate for an individual network. If the individual network performance were the same across all networks, as the ensemble size increases, we would expect to see an ensemble of networks with higher corruption rate perform better than an ensemble of networks with lower corruption rates. A higher corruption rate should lead to greater variance between individual network predictions, and, thus, a lower ensemble prediction error.
+
+Therefore, it is surprising that the rate of 0.4 actually performs better than 0.5 as the ensemble size increases (Figure \ref{fig:ecr_drop}). This might occur because, by chance, one or more of the 0.5 rate networks converged to a point with poor generalization error. Thus, as the ensemble size increases, more of the ensembles considered use the bad network. Because we used mean polling, if a bad network made strong enough incorrect predictions, it would easily be able to influence the ensemble prediction.
+
+For the dropout networks (Figure \ref{fig:ecr_drop}), the error rates still seem to be dropping as the ensemble size increases even up to an ensemble size of 8. This implies that the performance of the ensembles have not yet saturated, and performance could be further improved by increasing the ensemble size. This is consistent with the results of Wan et al. (2013), who achieved state-of-the-art results with a 12-network ensemble.
+
+\begin{figure}[]
+\centering
+\begin{minipage}{.75\textwidth}
+  \vspace*{\fill}
+  \centering
+  \includegraphics[width=.85\textwidth]{ensemble_drop}
+  \subcaption{Various corrpution rates for regular dropout}
+  \label{fig:ecr_drop}
+  \includegraphics[width=.85\textwidth]{ensemble_rand}
+  \subcaption{Various corrpution rates for random corruption}
+  \label{fig:ecr_rand}
+  \includegraphics[width=.85\textwidth]{ensemble_sp}
+  \subcaption{Various corruption rates for salt \& pepper corruption}
+  \label{fig:ecr_sp}
+\end{minipage}
+\caption{Ensemble error rate, varying the corruption rate for each corruption type. Ensemble prediction was done using mean polling of softmax output. Some models did not finish running, so the curves are not complete}
+\label{fig:ensemble_corruption_rate}
+\end{figure}
+
 \subsubsection{Network Polling Methods}
+
+\begin{table}[ht]
+\caption{Test classification error using mean polling for each individual netowrk prediction run and the indicated polling method for ensemble prediction}
+\label{tab:PollintMethods}
+\begin{center}
+\begin{tabular}{| l |  l  ||| l | l | l | l |}
+\hline
+Corruption Type & Polling Method & 0.4 & 0.5 & 0.6 & 0.7\\
+\hline
+\hline
+Dropout & Mean & 0.0100 & 0.0104 & 0.0118 & 0.0136 \\
+\hline
+Dropout & Median & 0.0980 & 0.0105 & 0.0120 & 0.0135 \\
+\hline
+Dropout & Max & 0.0105 & 0.0100 & 0.0116 & 0.0134 \\
+\hline
+Dropout & Min & 0.0104 & 0.0104 & 0.0115 & 0.0140 \\
+\hline
+Dropout & Product & 0.0100 & 0.0104 & 0.0117 & 0.0136 \\
+\hline
+\hline
+Salt \& Pepper & Mean & 0.0209 & 0.0189 & 0.0189 & 0.0226 \\
+\hline
+Salt \& Pepper & Median & 0.0167 & 0.0209 & 0.0189 & 0.0231\\
+\hline
+Salt \& Pepper & Max & 0.0166 & 0.0205 & 0.0189 & 0.0234 \\
+\hline
+Salt \& Pepper & Min & 0.0170 & 0.0207 & 0.0189 & 0.0226 \\
+\hline
+Salt \& Pepper & Product & 0.0167 & 0.0207 & 0.0189 & 0.0225 \\
+\hline
+\hline
+Random & Mean & 0.0181 & 0.0159 & 0.0170 & 0.0181 \\
+\hline
+Random & Median & 0.0181 & 0.0161 & 0.0168 & 0.0182 \\
+\hline
+Random & Max & 0.0181 & 0.0156 & 0.0173 & 0.0185 \\
+\hline
+Random & Min & 0.0181 & 0.0155 & 0.0174 & 0.0185 \\
+\hline
+Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
+\hline
+\end{tabular}∫
+\end{center}
+\end{table}
+
+\begin{figure}[ht] 
+  \label{ fig7} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods8} 
+    \subcaption{0.4 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage}%%
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods7} 
+    \subcaption{0.5 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods6} 
+    \subcaption{0.6 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage}%% 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods5} 
+    \subcaption{0.7 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage} 
+  \caption{Ensemble error rate for different polling methods. Only networks with standard dropout corruption type were used.}
+\end{figure}
 
 \subsection{Conclusions}
 
