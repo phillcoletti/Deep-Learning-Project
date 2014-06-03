@@ -229,6 +229,7 @@ We varied the dropout rate for each of our corruption types to determine what wo
 \end{figure}
 
 \subsection{Test performance}
+\label{subsec:milestone_test_performance}
 Given the qualitative difference in the filters learned with higher dropout rates, we might expect that performance would follow a similar trend. However, this was not the case. As in Hinton et al. (2012), standard dropout performed best on the test set with a rate of 0.5. As shown in Figures \ref{fig:rate,error} and \ref{fig:corruption,error}, it first appeared that the test error for all the other corruption types decreased with the dropout rate, and that the network trained with no corruption outperformed all types of noise other than standard dropout, with a classification error of 0.0302 on the test set. We performed prediction using for the random, salt \& pepper, and gaussian corrupted networks by performing a feed-forward pass through the network with no corruption added. Table \ref{tab:testErrorOrig} shows these initial quantitative results.
 
 \begin{figure}
@@ -417,9 +418,17 @@ For the dropout networks (Figure \ref{fig:ecr_drop}), the error rates still seem
 
 \subsubsection{Network Polling Methods}
 
+We ran several experiments to determine which method of ensemble prediction would be most effective. We considered a wide array of methods including mean, median, min, max, and product polling. We also wished to test a model voting scheme, where we would take the mode of the individual votes, but this method would have required much larger ensembles than we were able to create in our experiments. In all the experiments, we first gathered the softmax output of each network by running a feed-forward pass through the network 50 times and averaging the predictions from all runs as described in section \ref{subsec:milestone_test_performance}. We then used tested the above methods for combining the predictions of all networks in the ensemble.
+
+The quantitative results of the experiment for random and salt \& pepper noise (Table \ref{tab:PollingMethods}) were not clear, because some of the corruption rates had only one or two models in the ensemble. It is not fair to compare the performance of these different voting schemes with so few models, becuase the lack of ensemble size hides any strengths or weaknesses of the respective prediction methods. Therefore we only analyze the results of the ensemble prediction methods for standard dropout corruption.
+
+Mean polling and product polling perform very similarly at all corruption rates (Figure \ref{fig:PollingMethods}). Product polling is a bit more sensitive to outliers as their effect is felt more through the multiplication operation than simple addition. The performance of these two methods tends to be in the middle of the pack at all corruption rates. In contrast, max, min, and median polling tend to find themselves closer to the extremes in performance. This makes sense, as they only use the output of one network for prediction, although all networks are considered when selecting the min, max, or median. Median polling takes substantially longer than the other variations, as the network predictions must first be sorted. However, median polling is also robust to outliers, which can be advantageous for networks that have the potential to overfit.
+
+The results from the experiment do not suggest a clear choice for which ensemble prediction method should be used for polling an ensemble of dropout networks. The same experiment would need to be run on a much larger scale to reduce the effect of chance by allowing for a much larger number of ensemble combinations at each ensemble size.
+
 \begin{table}[ht]
 \caption{Test classification error using mean polling for each individual netowrk prediction run and the indicated polling method for ensemble prediction}
-\label{tab:PollintMethods}
+\label{tab:PollingMethods}
 \begin{center}
 \begin{tabular}{| l |  l  ||| l | l | l | l |}
 \hline
@@ -463,7 +472,7 @@ Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
 \end{table}
 
 \begin{figure}[ht] 
-  \label{ fig7} 
+  \label{fig:PollingMethods} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods8} 
