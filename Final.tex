@@ -361,7 +361,6 @@ We used a 784-800-800-10 architecture with a softmax output layer and a hyperbol
 The filters of the units in the first hidden layer using the new training schedule are similar to those found previously; those for the networks without any form of corruption look qualitatively less interesting compared to the regular dropout, random, and salt-and-pepper noise, which appear to detect edges and corners (Figure \ref{fig:filters}).
 
 \begin{figure}[ht] 
-  \label{fig:filters} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{filters_none_layer1.png} 
@@ -387,13 +386,13 @@ The filters of the units in the first hidden layer using the new training schedu
     \vspace{4ex}
   \end{minipage} 
   \caption{Filters of first layer hidden units in networks trained with either no noise or several different corruption types. The filters of models trained without any form of corruption look qualitatively less interesting compared to dropout, random, and salt-and-pepper noise, which appear to detect edges and corners.}
+  \label{fig:confusion_mats} 
 \end{figure}
 
 \subsubsection{Model Variance}
 In order to visualize what our networks learned when trained with different corruption types we constructed confusion matrices based on the test set. We averaged the confusion matrices for each of the corruption types to more easily compare them; however, we also calculated the standard deviation of each entry to test for potential variability in the network predictions. The results showed that the two best performing corruption types, traditional dropout and random noise, were comparable (Figure \ref{fig:confusion_mats}). This finding is not completely unexpected, however, as the error rates for these networks are within 0.5\% of each other. As such, there may be a collection of hard examples in the training set that all of these networks get wrong. Indeed, compared to the 97 errors made by our highest performing dropout network, between 79 and 82 of these mistakes are also made by the best models of thel other types. Interestingly, the standard deviation of networks trained with salt-and-pepper noise was much higher than any of the others (Figure \ref{tab:sd_confusionMats}). In contrast, the standard deviation of models trained without any form of corruption was much lower.
 
 \begin{figure}[ht] 
-  \label{fig:confusion_mats} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{noneConfusionMat.png} 
@@ -419,11 +418,12 @@ In order to visualize what our networks learned when trained with different corr
     \vspace{4ex}
   \end{minipage} 
   \caption{Mean confusion matrices for networks trained with different corruption types. Note that this visualization emphasizes parts of the matrices that were wrong by taking the log of a constant times its values and resizing the image to five times its original scale.}
+  \label{fig:confusion_mats} 
 \end{figure}
 
 \begin{table}[ht]
-\label{tab:sd_confusionMats}
 \caption{Mean standard deviation of confusion matrices for different corruption types}
+\label{tab:sd_confusionMats}
 \begin{center}
 \begin{tabular}{| l |  l |  l  | l | l | l | l | l |}
 \hline
@@ -438,7 +438,6 @@ Mean SD & 2.0946e-18 & 8.9267e-04 & 6.5672e-04 & 0.0013 \\
 To further explore the variance of individual models, we constructed a vector for each one to be used as a representation of its input-output mapping. Specifically, a vector was created by concatenating the softmax outputs of a network for each of 10 examples in every digit class. We then jointly discovered a low-dimensional embedding using t-Distributed Stochastic Neighbor Embedding (t-SNE) for networks belonging to every combination of two corruption types, in order to visualize their differences. The results of this analysis similarly showed that that networks trained with any type of corruption were hard to distinguish, again aside from those without any form of noise (Figure \ref{fig:tSNE_plots}).
 
 \begin{figure}[ht] 
-  \label{fig:tSNE_plots} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{A-tSNE_drop-none.png} 
@@ -476,9 +475,10 @@ To further explore the variance of individual models, we constructed a vector fo
     \vspace{4ex}
   \end{minipage} 
   \caption{t-SNE was used to find a 2-D embedding for the input-output mappings of networks of different corruption types in order to visualize their differences.}
+  \label{fig:tSNE_plots} 
 \end{figure}
 
-We also tested randomly selecting the type of corruption at each epoch of training. Models trained using this method approximated, but unfortunately never surpassed those using regular dropout. Their average error was 1.12%. A plot of their training and test error during training can be seen below (Figure \ref{fig:mixedError}). Note that no overfitting occurs because the learning rate steadily decays during training.
+We also tested randomly selecting the type of corruption at each epoch of training. Models trained using this method approximated, but unfortunately never surpassed those using regular dropout. Their average error was 1.12\%. A plot of their training and test error during training can be seen below (Figure \ref{fig:mixedError}). Note that no overfitting occurs because the learning rate steadily decays during training.
 
 \begin{figure}
 \begin{center}
@@ -551,13 +551,13 @@ For the dropout networks (Figure \ref{fig:ecr_drop}), the error rates still seem
 
 We ran several experiments to determine which method of ensemble prediction would be most effective. We considered a wide array of methods including mean, median, min, max, and product polling. We also wished to test a model voting scheme, where we would take the mode of the individual votes, but this method would have required much larger ensembles than we were able to create in our experiments. In all the experiments, we first gathered the softmax output of each network by running a feed-forward pass through the network 50 times and averaging the predictions from all runs as described in section \ref{subsec:milestone_test_performance}. We then used tested the above methods for combining the predictions of all networks in the ensemble.
 
-The quantitative results of the experiment for random and salt \& pepper noise (Table \ref{tab:PollingMethods}) were not clear, because some of the corruption rates had only one or two models in the ensemble. It is not fair to compare the performance of these different voting schemes with so few models, becuase the lack of ensemble size hides any strengths or weaknesses of the respective prediction methods. Therefore we only analyze the results of the ensemble prediction methods for standard dropout corruption.
+The quantitative results of the experiment for random and salt \& pepper noise (Table \ref{tab:PollingMethods1}) were not clear, because some of the corruption rates had only one or two models in the ensemble. It is not fair to compare the performance of these different voting schemes with so few models, becuase the lack of ensemble size hides any strengths or weaknesses of the respective prediction methods. Therefore we only analyze the results of the ensemble prediction methods for standard dropout corruption.
 
-Mean polling and product polling perform very similarly at all corruption rates (Figure \ref{fig:PollingMethods2}). Product polling is a bit more sensitive to outliers as their effect is felt more through the multiplication operation than simple addition. The performance of these two methods tends to be in the middle of the pack at all corruption rates. In contrast, max, min, and median polling tend to find themselves closer to the extremes in performance. This makes sense, as they only use the output of one network for prediction, although all networks are considered when selecting the min, max, or median. Although competitive in performance \ref{fig:PollingMethods1}, median polling takes substantially longer than the other variations, as the network predictions must first be sorted. Because fast inference is extremely important, we did not include median polling in the second run of experiments with larger ensemble sizes (Table \ref{tab:PollingMethods2}, Figure \ref{fig:PollingMethods2}).
+Mean polling and product polling perform very similarly at all corruption rates (Figure \ref{fig:PollingMethods2}). Product polling is a bit more sensitive to outliers as their effect is felt more through the multiplication operation than simple addition. The performance of these two methods tends to be in the middle of the pack at all corruption rates. In contrast, max, min, and median polling tend to find themselves closer to the extremes in performance. This makes sense, as they only use the output of one network for prediction, although all networks are considered when selecting the min, max, or median. Although competitive in performance (Figure \ref{fig:PollingMethods1}), median polling takes substantially longer than the other variations, as the network predictions must first be sorted. Because fast inference is extremely important, we did not include median polling in the second run of experiments with larger ensemble sizes (Figure \ref{fig:PollingMethods2}).
 
 The results from the experiment do not suggest a clear choice for which ensemble prediction method should be used for polling an ensemble of dropout networks. The same experiment would need to be run on a much larger scale to reduce the effect of chance by allowing for a much larger number of ensemble combinations at each ensemble size. Furthermore, the ensembles of dropout networks do not appear to have fully saturated in performance, even with over 10 models. This implies that even larger ensembles may yield greater performance. Adding more networks would allow us to extrapolate the curve even further and see if there is a difference between where the various ensemble prediction methods plateau.
 
-\begin{table}[ht]
+\begin{table}[!htb]
 \caption{Test classification error using mean polling for each individual network prediction run and the indicated polling method for ensemble prediction}
 \label{tab:PollingMethods1}
 \begin{center}
@@ -602,114 +602,67 @@ Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
 \end{center}
 \end{table}
 
-\begin{figure}[ht] 
-  \label{fig:PollingMethods1} 
+\begin{figure}[!htb] 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods8} 
     \subcaption{0.4 Corruption Rate} 
-    \vspace{4ex}
+    \vspace{2ex}
   \end{minipage}%%
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods7} 
     \subcaption{0.5 Corruption Rate} 
-    \vspace{4ex}
+    \vspace{2ex}
   \end{minipage} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods6} 
     \subcaption{0.6 Corruption Rate} 
-    \vspace{4ex}
   \end{minipage}%% 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods5} 
     \subcaption{0.7 Corruption Rate} 
-    \vspace{4ex}
   \end{minipage} 
   \caption{Ensemble error rate for different polling methods. Only networks with standard dropout corruption type were used.}
+\label{fig:PollingMethods1} 
 \end{figure}
 
-\begin{table}[ht]
-\caption{Test classification error using mean polling for each individual network prediction run and the indicated polling method for ensemble prediction. More models were included in this run than in Table \ref{tab:PollingMethods1}}.
-\label{tab:PollingMethods2}
-\begin{center}
-\begin{tabular}{| l |  l  ||| l | l | l | l |}
-\hline
-Corruption Type & Polling Method & 0.4 & 0.5 & 0.6 & 0.7\\
-\hline
-\hline
-Dropout & Mean & 0.0100 & 0.0104 & 0.0118 & 0.0136 \\
-\hline
-Dropout & Median & 0.0980 & 0.0105 & 0.0120 & 0.0135 \\
-\hline
-Dropout & Max & 0.0105 & 0.0100 & 0.0116 & 0.0134 \\
-\hline
-Dropout & Min & 0.0104 & 0.0104 & 0.0115 & 0.0140 \\
-\hline
-Dropout & Product & 0.0100 & 0.0104 & 0.0117 & 0.0136 \\
-\hline
-\hline
-Salt \& Pepper & Mean & 0.0209 & 0.0189 & 0.0189 & 0.0226 \\
-\hline
-Salt \& Pepper & Median & 0.0167 & 0.0209 & 0.0189 & 0.0231\\
-\hline
-Salt \& Pepper & Max & 0.0166 & 0.0205 & 0.0189 & 0.0234 \\
-\hline
-Salt \& Pepper & Min & 0.0170 & 0.0207 & 0.0189 & 0.0226 \\
-\hline
-Salt \& Pepper & Product & 0.0167 & 0.0207 & 0.0189 & 0.0225 \\
-\hline
-\hline
-Random & Mean & 0.0181 & 0.0159 & 0.0170 & 0.0181 \\
-\hline
-Random & Median & 0.0181 & 0.0161 & 0.0168 & 0.0182 \\
-\hline
-Random & Max & 0.0181 & 0.0156 & 0.0173 & 0.0185 \\
-\hline
-Random & Min & 0.0181 & 0.0155 & 0.0174 & 0.0185 \\
-\hline
-Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
-\hline
-\end{tabular}∫
-\end{center}
-\end{table}
-
-\begin{figure}[ht] 
-  \label{fig:PollingMethods2} 
+\begin{figure}[!htb] 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods8a} 
     \subcaption{0.4 Corruption Rate} 
-    \vspace{4ex}
+    \vspace{2ex}
   \end{minipage}%%
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods7a} 
     \subcaption{0.5 Corruption Rate} 
-    \vspace{4ex}
+    \vspace{2ex}
   \end{minipage} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods6a} 
     \subcaption{0.6 Corruption Rate} 
-    \vspace{4ex}
   \end{minipage}%% 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods5a} 
     \subcaption{0.7 Corruption Rate} 
-    \vspace{4ex}
   \end{minipage} 
   \caption{Ensemble error rate for different polling methods. Only networks with standard dropout corruption type were used. More models were included in this run than in Figure \ref{fig:PollingMethods1}.}
+  \label{fig:PollingMethods2} 
 \end{figure}
 
 \subsection{Conclusions}
 
-Our results clearly indicate that all forms of corruption, aside from Gaussian noise, improve model performance. Of the types of corruption we tested, traditional dropout, also known as zero-masking, worked the best.
+Our results clearly indicate that all forms of corruption, aside from Gaussian noise, improve model performance. Of the types of corruption we tested, traditional dropout, also known as zero-masking, worked the best. The improved performance of salt \& pepper noise in stacked denoising autoencoders (Vincent et al (2010)) did not carry over into supervised training.
 
-The optimal choice of polling method seems to depend on context.
+Our results also clearly indicate that the corruption rate of 0.5 that is ideal for individual model performance (Hinton et al (2010)) also performs best in the ensemble learning setting. The additional stochasticity injected by corrupting more hidden units decreases individual model performance far more than any benefit it creates in terms of increase variance.
+
+Our experiments also did not yield any conclusive results with regards to ensemble prediction methods. The optimal choice of polling method seems to depend on the context. It does, however, appear clear that performance did did not plateau even with 11 models in the ensemble. Thus, the learned networks had enough variance in their predictions that ensemble learning would have continued to increase perforamance with even larger ensemble sizes.
 
 \subsection{Shortcomings}
 \label{subsec:shortcomings}
@@ -730,6 +683,8 @@ Currently, in order to get the softmax output of an individual network during te
 As noted in section \ref{subsec:shortcomings}, using the features from a trained CNN as input to our models for MNIST gave poorer performance for unknown reasons. If we had more time, we would investigate this issue further and consider concatenating these features with the original pixels to see if we gained better performance that way. Applying the same experiments to a natural images dataset would be an important step to confirm our results, as the very binarized input of the mnist digits can yield vastly different performance with different types of networks. 
 
 Lastly, the experiments conducted in section \ref{subsec:polling} did not produce conclusive results and suggest that one ensemble prediction method yielded better performance than the others. In part, this may be due to random chance in the softmax output of the networks. In order to test these ensemble prediction methods more thoroughly, we would run the same experiment on a much larger scale which would average out the effect of outlying networks by allowing for exponentially more model combinations at each ensemble size.
+
+As ensemble learning appears to be so effective for these neural networks, future work should investigate other methods of increasing model variance. Using different parameter initialization schemes or varying the corruption rate by layer might yield more model variance without sacrificing individual model error rate. As hardware continues to improve, storing and polling large ensembles of neural networks may become feasible even on a commercial scale, making this area of research extremely valuable.
 
 % \section{General formatting instructions}
 % \label{gen_inst}
