@@ -502,13 +502,13 @@ We ran several experiments to determine which method of ensemble prediction woul
 
 The quantitative results of the experiment for random and salt \& pepper noise (Table \ref{tab:PollingMethods}) were not clear, because some of the corruption rates had only one or two models in the ensemble. It is not fair to compare the performance of these different voting schemes with so few models, becuase the lack of ensemble size hides any strengths or weaknesses of the respective prediction methods. Therefore we only analyze the results of the ensemble prediction methods for standard dropout corruption.
 
-Mean polling and product polling perform very similarly at all corruption rates (Figure \ref{fig:PollingMethods}). Product polling is a bit more sensitive to outliers as their effect is felt more through the multiplication operation than simple addition. The performance of these two methods tends to be in the middle of the pack at all corruption rates. In contrast, max, min, and median polling tend to find themselves closer to the extremes in performance. This makes sense, as they only use the output of one network for prediction, although all networks are considered when selecting the min, max, or median. Median polling takes substantially longer than the other variations, as the network predictions must first be sorted. However, median polling is also robust to outliers, which can be advantageous for networks that have the potential to overfit.
+Mean polling and product polling perform very similarly at all corruption rates (Figure \ref{fig:PollingMethods2}). Product polling is a bit more sensitive to outliers as their effect is felt more through the multiplication operation than simple addition. The performance of these two methods tends to be in the middle of the pack at all corruption rates. In contrast, max, min, and median polling tend to find themselves closer to the extremes in performance. This makes sense, as they only use the output of one network for prediction, although all networks are considered when selecting the min, max, or median. Although competitive in performance \ref{fig:PollingMethods1}, median polling takes substantially longer than the other variations, as the network predictions must first be sorted. Because fast inference is extremely important, we did not include median polling in the second run of experiments with larger ensemble sizes (Table \ref{tab:PollingMethods2}, Figure \ref{fig:PollingMethods2}).
 
-The results from the experiment do not suggest a clear choice for which ensemble prediction method should be used for polling an ensemble of dropout networks. The same experiment would need to be run on a much larger scale to reduce the effect of chance by allowing for a much larger number of ensemble combinations at each ensemble size.
+The results from the experiment do not suggest a clear choice for which ensemble prediction method should be used for polling an ensemble of dropout networks. The same experiment would need to be run on a much larger scale to reduce the effect of chance by allowing for a much larger number of ensemble combinations at each ensemble size. Furthermore, the ensembles of dropout networks do not appear to have fully saturated in performance, even with over 10 models. This implies that even larger ensembles may yield greater performance. Adding more networks would allow us to extrapolate the curve even further and see if there is a difference between where the various ensemble prediction methods plateau.
 
 \begin{table}[ht]
-\caption{Test classification error using mean polling for each individual netowrk prediction run and the indicated polling method for ensemble prediction}
-\label{tab:PollingMethods}
+\caption{Test classification error using mean polling for each individual network prediction run and the indicated polling method for ensemble prediction}
+\label{tab:PollingMethods1}
 \begin{center}
 \begin{tabular}{| l |  l  ||| l | l | l | l |}
 \hline
@@ -552,7 +552,7 @@ Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
 \end{table}
 
 \begin{figure}[ht] 
-  \label{fig:PollingMethods} 
+  \label{fig:PollingMethods1} 
   \begin{minipage}[b]{0.5\linewidth}
     \centering
     \includegraphics[width=\linewidth]{methods8} 
@@ -578,6 +578,80 @@ Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
     \vspace{4ex}
   \end{minipage} 
   \caption{Ensemble error rate for different polling methods. Only networks with standard dropout corruption type were used.}
+\end{figure}
+
+\begin{table}[ht]
+\caption{Test classification error using mean polling for each individual network prediction run and the indicated polling method for ensemble prediction. More models were included in this run than in Table \ref{tab:PollingMethods1}}.
+\label{tab:PollingMethods2}
+\begin{center}
+\begin{tabular}{| l |  l  ||| l | l | l | l |}
+\hline
+Corruption Type & Polling Method & 0.4 & 0.5 & 0.6 & 0.7\\
+\hline
+\hline
+Dropout & Mean & 0.0100 & 0.0104 & 0.0118 & 0.0136 \\
+\hline
+Dropout & Median & 0.0980 & 0.0105 & 0.0120 & 0.0135 \\
+\hline
+Dropout & Max & 0.0105 & 0.0100 & 0.0116 & 0.0134 \\
+\hline
+Dropout & Min & 0.0104 & 0.0104 & 0.0115 & 0.0140 \\
+\hline
+Dropout & Product & 0.0100 & 0.0104 & 0.0117 & 0.0136 \\
+\hline
+\hline
+Salt \& Pepper & Mean & 0.0209 & 0.0189 & 0.0189 & 0.0226 \\
+\hline
+Salt \& Pepper & Median & 0.0167 & 0.0209 & 0.0189 & 0.0231\\
+\hline
+Salt \& Pepper & Max & 0.0166 & 0.0205 & 0.0189 & 0.0234 \\
+\hline
+Salt \& Pepper & Min & 0.0170 & 0.0207 & 0.0189 & 0.0226 \\
+\hline
+Salt \& Pepper & Product & 0.0167 & 0.0207 & 0.0189 & 0.0225 \\
+\hline
+\hline
+Random & Mean & 0.0181 & 0.0159 & 0.0170 & 0.0181 \\
+\hline
+Random & Median & 0.0181 & 0.0161 & 0.0168 & 0.0182 \\
+\hline
+Random & Max & 0.0181 & 0.0156 & 0.0173 & 0.0185 \\
+\hline
+Random & Min & 0.0181 & 0.0155 & 0.0174 & 0.0185 \\
+\hline
+Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
+\hline
+\end{tabular}∫
+\end{center}
+\end{table}
+
+\begin{figure}[ht] 
+  \label{fig:PollingMethods2} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods8a} 
+    \subcaption{0.4 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage}%%
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods7a} 
+    \subcaption{0.5 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods6a} 
+    \subcaption{0.6 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage}%% 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{methods5a} 
+    \subcaption{0.7 Corruption Rate} 
+    \vspace{4ex}
+  \end{minipage} 
+  \caption{Ensemble error rate for different polling methods. Only networks with standard dropout corruption type were used. More models were included in this run than in Figure \ref{fig:PollingMethods1}.}
 \end{figure}
 
 \subsection{Conclusions}
