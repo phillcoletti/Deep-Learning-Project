@@ -435,7 +435,58 @@ Mean SD & 2.0946e-18 & 8.9267e-04 & 6.5672e-04 & 0.0013 \\
 \end{center}
 \end{table}
 
-To further explore the variance of individual models, we constructed a vector for each one to be used as a representation of its input-output mapping. Specifically, a vector was created by concatenating the softmax outputs of a network for each of 10 examples in every digit class. We then jointly discovered a low-dimensional embedding using t-Distributed Stochastic Neighbor Embedding (t-SNE) for networks belonging to every combination of two corruption types, in order to visualize their differences. The results of this analysis similarly showed that that networks trained with any type of corruption were hard to distinguish, again aside from those without any form of noise.
+To further explore the variance of individual models, we constructed a vector for each one to be used as a representation of its input-output mapping. Specifically, a vector was created by concatenating the softmax outputs of a network for each of 10 examples in every digit class. We then jointly discovered a low-dimensional embedding using t-Distributed Stochastic Neighbor Embedding (t-SNE) for networks belonging to every combination of two corruption types, in order to visualize their differences. The results of this analysis similarly showed that that networks trained with any type of corruption were hard to distinguish, again aside from those without any form of noise (Figure \ref{fig:tSNE_plots}).
+
+\begin{figure}[ht] 
+  \label{fig:tSNE_plots} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_drop-none.png} 
+    \subcaption{Drop and none} 
+    \vspace{4ex}
+  \end{minipage}%%
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_random-none.png} 
+    \subcaption{Random and none} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_salt_pepper-none.png} 
+    \subcaption{Salt-and-pepper and none} 
+    \vspace{4ex}
+  \end{minipage}%% 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_drop-random.png} 
+    \subcaption{Drop and random} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_drop-salt_pepper.png} 
+    \subcaption{Drop and salt-and-pepper} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{A-tSNE_random-salt_pepper.png} 
+    \subcaption{Random and salt-and-pepper} 
+    \vspace{4ex}
+  \end{minipage} 
+  \caption{t-SNE was used to find a 2-D embedding for the input-output mappings of networks of different corruption types in order to visualize their differences.}
+\end{figure}
+
+We also tested randomly selecting the type of corruption at each epoch of training. Models trained using this method approximated, but unfortunately never surpassed those using regular dropout. Their average error was 1.12%. A plot of their training and test error during training can be seen below (Figure \ref{fig:mixedError}). Note that no overfitting occurs because the learning rate steadily decays during training.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\textwidth]{mixedTrainTestErr.png}
+\caption{Training and test error for a mixed network in which the type of corruption is randomly chosen during each epoch.}
+\label{fig:mixedError}
+\end{center}
+\end{figure}
 
 \subsection{Ensemble Learning}
 Based on the impressive results achieved by Wan et. al (2003), we sought to improve classification performance by polling an ensemble of neural networks. The order of input examples, initialization, and corruption masks were all randomized, so that each network in the ensemble would be different. We ran several series of experiments to determine how corruption type, corruption rate, and polling method effected the performance of the ensemble.
