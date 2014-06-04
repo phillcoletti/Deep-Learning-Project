@@ -496,6 +496,7 @@ For the dropout networks (Figure \ref{fig:ecr_drop}), the error rates still seem
 \end{figure}
 
 \subsubsection{Network Polling Methods}
+\label{subsec:polling}
 
 We ran several experiments to determine which method of ensemble prediction would be most effective. We considered a wide array of methods including mean, median, min, max, and product polling. We also wished to test a model voting scheme, where we would take the mode of the individual votes, but this method would have required much larger ensembles than we were able to create in our experiments. In all the experiments, we first gathered the softmax output of each network by running a feed-forward pass through the network 50 times and averaging the predictions from all runs as described in section \ref{subsec:milestone_test_performance}. We then used tested the above methods for combining the predictions of all networks in the ensemble.
 
@@ -586,20 +587,24 @@ Our results clearly indicate that all forms of corruption, aside from Gaussian n
 The optimal choice of polling method seems to depend on context.
 
 \subsection{Shortcomings}
+\label{subsec:shortcomings}
 
-\subsubsection{Convolutional neural network}
-MATLAB
-Caffe
+\subsubsection{Limited Resources}
 
-\subsubsection{CIFAR-10}
+\subsubsection{CNN Feature Extractor}
+
+In order to generalize our results to CIFAR-10, we sought to implement a CNN feature extractor that we could feed into a fully-connected layer with corruption as was done in Wan et al (2013). We spent a large amount of time getting Caffe working on the Anthill cluster. Given our time constraints, we thought that our best chance at achieving results would be to train the default CIFAR-10 example network, and use the feature extractor to write the output of the final pooling layer to file. However, the google protobuf protocol, which is the way that data is serialized and stored in Caffe, makes this transformation very difficult. In the end, the feature extractor did not work as intenced, so we switched over to using the CNN modules from the DeepLearnToolbox in Matlab.
+
 
 We ran preliminary experiments with CIFAR-10 using features from a trained CNN; however, the results were poor, so we decided to spend our time trying to thoroughly understand our methodology, as opposed to trying to generalize our findings to a more complicated data set, particularly due to our constraint on the number of models we would be able to train before the due date.
 
 \subsection{Future Work}
 
-Currently, when testing polling methods, we use the averaged prediction of each network tested under the same conditions as training; that is, with corruption. As you pointed out, instead of using the mean in this initial phase, we could also experiment with all the other techniques for combining predictions such as the median, maximum, minimum, or product, among others. While we saw no reason to explore this route because of its weaker theoretical justification compared to the mean network prediction, it could turn out to have an important role and would be worthwhile to pursue in future research.
+Currently, in order to get the softmax output of an individual network during testing, we use the mean prediction of the network tested under the same conditions as training over 50 feed-forward passes (each with a randomly assigned mask). Instead of using mean polling in this initial phase, we could also experiment with all the other techniques for combining predictions such as the median, maximum, minimum, product, or voting. While we saw no reason to explore this route because of its weaker theoretical justification compared to the mean network prediction, it could turn out to have an important role and would be worthwhile to pursue in future research.
 
-As noted in our shortcomings, using the features from a trained CNN as input to our models for MNIST gave poorer performance for unknown reasons. If we had more time, we would investigate this issue further and consider concatenating these features with the original pixels to see if we gained better performance that way.
+As noted in section \ref{subsec:shortcomings}, using the features from a trained CNN as input to our models for MNIST gave poorer performance for unknown reasons. If we had more time, we would investigate this issue further and consider concatenating these features with the original pixels to see if we gained better performance that way. Applying the same experiments to a natural images dataset would be an important step to confirm our results, as the very binarized input of the mnist digits can yield vastly different performance with different types of networks. 
+
+Lastly, the experiments conducted in section \ref{subsec:polling} did not produce conclusive results and suggest that one ensemble prediction method yielded better performance than the others. In part, this may be due to random chance in the softmax output of the networks. In order to test these ensemble prediction methods more thoroughly, we would run the same experiment on a much larger scale which would average out the effect of outlying networks by allowing for exponentially more model combinations at each ensemble size.
 
 % \section{General formatting instructions}
 % \label{gen_inst}
