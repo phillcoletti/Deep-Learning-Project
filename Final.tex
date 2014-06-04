@@ -347,16 +347,95 @@ The results achieved thus far indicate that standard Dropout is the most effecti
 Due to our slow MATLAB implementation (2000 epochs takes approximately two days), we were hindered in our effort to make rapid progress towards our milestone goals. We also had difficulty randomizing the networks. Despite training five separate instances of each network setup (same type of corruption type and rate), all networks of the same setup were exactly identical. We have since learned that we must explicitly seed the MATLAB rand function or the result is completely deterministic. Unfortunately, we were unable to exactly replicate the results from Hinton et al (2012), as we used different training parameters.
 
 \subsection{Next steps}
-For the final, we will continue to improve the performance of individual networks by adjusting our training parameters to match those of Hinton et al (2012) instead of that of Wan et al (2013). We will then seek to explore the variance of the models produced under different corruption types and rates in order to assess how well they would perform in an ensemble learning setting. One possible method to improve performance is to train a network by combining all corruption types, stochastically selecting a corruption type for each mini-batch during training.
-
-After testing these methods on MNIST, we will attempt to approach or surpass state-of-the-art performance by using a CNN feature extractor and data augmentation. Lastly, we hope to extend our work to the CIFAR-10 data set, to validate our findings on MNIST.
+For the final, we will continue to improve the performance of individual networks by adjusting our training parameters to match those of Hinton et al (2012) instead of that of Wan et al (2013). We will then seek to explore the variance of the models produced under different corruption types and rates in order to assess how well they would perform in an ensemble learning setting. One possible method to improve performance is to train a network by combining all corruption types, stochastically selecting a corruption type for each epoch during training.
 
 \section{Final}
 
 \subsection{Training Details}
 
+We used a 784-800-800-10 architecture with a softmax output layer and a hyperbolic tangent activation function for our experiments on MNIST. Our training schedule was taken from Hinton et al. (2012). We used a momentum of 0.5 that is increased linearly to 0.99 over the first 500 epochs, after which it remains at 0.99. While we varied the dropout rate in the hidden layers, we always used a rate of 0.2 for the input units, as in Hinton et al. (2012). No weight decay was used. The incoming weight vector corresponding to each hidden unit was constrained to have a maximum squared length of 15. We used an exponentially decaying learning rate that starts at 10 and is multiplied by 0.998 after each epoch during training. We trained each network for a total of 3000 epochs. Using our MATLAB implementation, each model takes about 4 days to train.
 
-\subsection{Comparison of Corruption Types}
+\subsection{Individual Models}
+
+\subsubsection{Filters}
+The filters of the units in the first hidden layer using the new training schedule are similar to those found previously; those for the networks without any form of corruption look qualitatively less interesting compared to the regular dropout, random, and salt-and-pepper noise, which appear to detect edges and corners (Figure \ref{fig:filters}).
+
+\begin{figure}[ht] 
+  \label{fig:filters} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{filters_none_layer1.png} 
+    \subcaption{None} 
+    \vspace{4ex}
+  \end{minipage}%%
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{filters_random_layer1.png} 
+    \subcaption{Random} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{filters_drop_layer1.png} 
+    \subcaption{Drop} 
+    \vspace{4ex}
+  \end{minipage}%% 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{filters_saltPepper_layer1.png} 
+    \subcaption{Salt-and-pepper} 
+    \vspace{4ex}
+  \end{minipage} 
+  \caption{Filters of first layer hidden units in networks trained with either no noise or several different corruption types. The filters of models trained without any form of corruption look qualitatively less interesting compared to dropout, random, and salt-and-pepper noise, which appear to detect edges and corners.}
+\end{figure}
+
+\subsubsection{Model Variance}
+In order to visualize what our networks learned when trained with different corruption types we constructed confusion matrices based on the test set. We averaged the confusion matrices for each of the corruption types to more easily compare them; however, we also calculated the standard deviation of each entry to test for potential variability in the network predictions. The results showed that the two best performing corruption types, traditional dropout and random noise, were comparable (Figure \ref{fig:confusion_mats}). This finding is not completely unexpected, however, as the error rates for these networks are within 0.5\% of each other. As such, there may be a collection of hard examples in the training set that all of these networks get wrong. Indeed, compared to the 97 errors made by our highest performing dropout network, between 79 and 82 of these mistakes are also made by the best models of thel other types. Interestingly, the standard deviation of networks trained with salt-and-pepper noise was much higher than any of the others (Figure \ref{tab:sd_confusionMats}). In contrast, the standard deviation of models trained without any form of corruption was much lower.
+
+\begin{figure}[ht] 
+  \label{fig:confusion_mats} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{noneConfusionMat.png} 
+    \subcaption{None} 
+    \vspace{4ex}
+  \end{minipage}%%
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{randomConfusionMat.png} 
+    \subcaption{Random} 
+    \vspace{4ex}
+  \end{minipage} 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{dropConfusionMat.png} 
+    \subcaption{Drop} 
+    \vspace{4ex}
+  \end{minipage}%% 
+  \begin{minipage}[b]{0.5\linewidth}
+    \centering
+    \includegraphics[width=\linewidth]{saltPepperConfusionMat.png} 
+    \subcaption{Salt-and-pepper} 
+    \vspace{4ex}
+  \end{minipage} 
+  \caption{Mean confusion matrices for networks trained with different corruption types. Note that this visualization emphasizes parts of the matrices that were wrong by taking the log of a constant times its values and resizing the image to five times its original scale.}
+\end{figure}
+
+\begin{table}[ht]
+\label{tab:sd_confusionMats}
+\caption{Mean standard deviation of confusion matrices for different corruption types}
+\begin{center}
+\begin{tabular}{| l |  l |  l  | l | l | l | l | l |}
+\hline
+Corruption type & None & Random & Drop & Salt-and-pepper \\
+\hline
+Mean SD & 2.0946e-18 & 8.9267e-04 & 6.5672e-04 & 0.0013 \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+To further explore the variance of individual models, we constructed a vector for each one to be used as a representation of its input-output mapping. Specifically, a vector was created by concatenating the softmax outputs of a network for each of 10 examples in every digit class. We then jointly discovered a low-dimensional embedding using t-Distributed Stochastic Neighbor Embedding (t-SNE) for networks belonging to every combination of two corruption types, in order to visualize their differences. The results of this analysis similarly showed that that networks trained with any type of corruption were hard to distinguish, again aside from those without any form of noise.
 
 \subsection{Ensemble Learning}
 Based on the impressive results achieved by Wan et. al (2003), we sought to improve classification performance by polling an ensemble of neural networks. The order of input examples, initialization, and corruption masks were all randomized, so that each network in the ensemble would be different. We ran several series of experiments to determine how corruption type, corruption rate, and polling method effected the performance of the ensemble.
@@ -389,7 +468,7 @@ It is also worth noting that we cannot draw firm conclusions about the performan
 
 \subsubsection{Corruption Rate}
 
-In this set of experiments, we examine the effect of corruption rate on ensemble learning.Across all corruption types, lower dropout rates appeared to outperform higher corruption rates (Figure \ref{fig:ensemble_corruption_rate}). Due to the lack of models that completed training for random and salt \& pepper noise, we are unable to tell if those corruption types behave significantly differently than standard dropout.
+In this set of experiments, we examine the effect of corruption rate on ensemble learning. Across all corruption types, lower dropout rates appeared to outperform higher corruption rates (Figure \ref{fig:ensemble_corruption_rate}). Due to the lack of models that completed training for random and salt \& pepper noise, we are unable to tell if those corruption types behave significantly differently than standard dropout.
 
 For the standard dropout ensembles, dropout rates of 0.4 and 0.5 perform very similarly. We would expect to see a dropout rate of 0.5 perform better at all ensemble sizes for two reasons. Hinton et al. (2010) discovered that 0.5 is the ideal dropout rate for an individual network. If the individual network performance were the same across all networks, as the ensemble size increases, we would expect to see an ensemble of networks with higher corruption rate perform better than an ensemble of networks with lower corruption rates. A higher corruption rate should lead to greater variance between individual network predictions, and, thus, a lower ensemble prediction error.
 
@@ -502,7 +581,25 @@ Random & Product & 0.0181 & 0.0158 & 0.0168 & 0.0181 \\
 
 \subsection{Conclusions}
 
+Our results clearly indicate that all forms of corruption, aside from Gaussian noise, improve model performance. Of the types of corruption we tested, traditional dropout, also known as zero-masking, worked the best.
+
+The optimal choice of polling method seems to depend on context.
+
+\subsection{Shortcomings}
+
+\subsubsection{Convolutional neural network}
+MATLAB
+Caffe
+
+\subsubsection{CIFAR-10}
+
+We ran preliminary experiments with CIFAR-10 using features from a trained CNN; however, the results were poor, so we decided to spend our time trying to thoroughly understand our methodology, as opposed to trying to generalize our findings to a more complicated data set, particularly due to our constraint on the number of models we would be able to train before the due date.
+
 \subsection{Future Work}
+
+Currently, when testing polling methods, we use the averaged prediction of each network tested under the same conditions as training; that is, with corruption. As you pointed out, instead of using the mean in this initial phase, we could also experiment with all the other techniques for combining predictions such as the median, maximum, minimum, or product, among others. While we saw no reason to explore this route because of its weaker theoretical justification compared to the mean network prediction, it could turn out to have an important role and would be worthwhile to pursue in future research.
+
+As noted in our shortcomings, using the features from a trained CNN as input to our models for MNIST gave poorer performance for unknown reasons. If we had more time, we would investigate this issue further and consider concatenating these features with the original pixels to see if we gained better performance that way.
 
 % \section{General formatting instructions}
 % \label{gen_inst}
